@@ -1,0 +1,84 @@
+
+════════════════════════════════════════════════════════════════════════
+  STUDIIO CALIBRATION REPORT
+  3 Fagan Place Cumbalum — Living + Family + Dining + Entry
+  Mode: MULTI-ROOM COMBINED
+  2026-05-18T21:54:33Z
+════════════════════════════════════════════════════════════════════════
+
+  SCAN QUALITY
+  ────────────────────────────────────────────────────────────────────────
+  Mesh anchors:    67
+  Vertices:         413388
+  Room height:      2.58m
+  Floor coverage:   82%%
+
+  BOUNDING BOX (multi-room)
+  ────────────────────────────────────────────────────────────────────────
+  Measured width:    7231mm
+  Measured depth:    8052mm
+  Bounding area:    58.2m²
+  Combined GT area: 46.6m²
+  (Dimension accuracy grading skipped for multi-room scans)
+
+  DOORS  (expected: 2)
+  ────────────────────────────────────────────────────────────────────────
+  ✓ Door (820mm standard)
+    Detected: door 1000mm  [error: +180mm]
+  ✓ Front door (1266mm entry)
+    Detected: double_door 1300mm  [error: +34mm]
+  ? 8 extra door(s) detected (possible false positives)
+
+  WINDOWS  (expected: 4)
+  ────────────────────────────────────────────────────────────────────────
+  ✗ Awning window 1 (AR 1806 AWN 1806mm) — NOT DETECTED
+  ✗ Awning window 2 (AR 1806 AWN 1806mm) — NOT DETECTED
+  ✗ Sliding window (SW-1830 1830mm) — NOT DETECTED
+  ✓ Sliding window (SW-1224 1224mm)
+    Detected: window 700mm  [error: -524mm]
+
+  OPENINGS  (expected: 2)
+  ────────────────────────────────────────────────────────────────────────
+  ✗ Opening to Entry (1570mm) — NOT DETECTED
+  ✗ Stacker to outdoor living (5130mm) — NOT DETECTED
+
+  FIXTURES  (expected: 8)
+  ────────────────────────────────────────────────────────────────────────
+  ✗ Dishwasher (dishwasher) — NOT DETECTED
+  ✗ Fridge space (refrigerator) — NOT DETECTED
+  ✓ Wall hung vanity (vanity)
+    Detected: vanity 911×342mm at 923mm height
+    Size error: width 411mm, depth -557mm
+  ✓ Stone bench (kitchen_bench)
+    Detected: bench 2275×839mm at 902mm height
+    Size error: width -594mm, depth 239mm
+  ✓ Breakfast bar (kitchen_island)
+    Detected: bench 2275×839mm at 902mm height
+    Size error: width 75mm, depth 239mm
+  ✗ Wall oven tower (oven) — NOT DETECTED
+  ✗ Staircase UP (stairs) — NOT DETECTED
+  ✗ Balustrade (custom) — NOT DETECTED
+
+  ? FALSE POSITIVES:
+    ? bath 1245×903mm at 468mm
+    ? bath 1232×1328mm at 455mm
+    ? toilet 776×250mm at 447mm
+    ? toilet 457×701mm at 478mm
+    ? bath 1626×1227mm at 438mm
+    ? bed 3521×1351mm at 755mm
+    ? bed 1597×892mm at 739mm
+    ? bench 2275×839mm at 902mm
+    ? bench 925×1203mm at 865mm
+    ? bench 569×1015mm at 896mm
+    ? bench 1016×498mm at 921mm
+
+  SCORECARD
+  ────────────────────────────────────────────────────────────────────────
+  Doors:     2/2
+  Windows:   1/4
+  Openings:  0/2
+  Fixtures:  3/8
+  ─────────────────
+  TOTAL:     6/16 features (37%%)
+
+════════════════════════════════════════════════════════════════════════

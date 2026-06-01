@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Studiio Dolls House — Plane Anchors</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }
+  canvas { display: block; }
+  #label {
+    position: absolute; top: 16px; left: 16px; color: rgba(255,255,255,0.3);
+    font-size: 11px; pointer-events: none; letter-spacing: 1px;
+  }
+  #controls {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px;
+  }
+  #controls button {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
+    color: #ccc; padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; transition: all 0.2s;
+  }
+  #controls button:hover { background: rgba(255,255,255,0.18); color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="label">PLANE ANCHORS — 09:01 SCAN</div>
+
+<div id="controls">
+  <button id="btnDolls">Dolls House</button>
+  <button id="btnTop">Top Down</button>
+  <button id="btnWalk">Walk Through</button>
+  <button id="btnRaw">Raw Planes</button>
+  <button id="btnMerged">Merged</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const FLOOR_LEVEL = -1.569;
+const DOLLS_HEIGHT = 1.8;
+const WALL_THICKNESS = 0.15;
+
+const floorPolygon = [
+  {x:-4.450069,z:-3.245081},{x:3.409869,z:-2.280003},{x:2.872926,z:2.093044},
+  {x:2.650323,z:2.602611},{x:-0.238899,z:5.477163},{x:-3.492887,z:5.077624},
+  {x:-8.275406,z:0.724202}
+];
+
+// ═══════════════════════════════════════
+// RAW PLANE ANCHOR DATA
+// ═══════════════════════════════════════
+
+const rawWalls = [
+  {sx:-1.256,sz:-2.808,ex:2.612,ez:-2.309,w:3.9,h:2.45,deg:7.4},
+  {sx:-1.049,sz:-2.79,ex:0.882,ez:-2.52,w:1.95,h:2.1,deg:8.0},
+  {sx:-2.522,sz:-2.447,ex:0.457,ez:-2.088,w:3.0,h:2.55,deg:6.9},
+  {sx:-1.861,sz:-2.199,ex:-0.565,ez:-2.092,w:1.3,h:2.5,deg:4.7},
+  {sx:2.218,sz:2.515,ex:0.305,ez:2.238,w:1.93,h:1.9,deg:-171.8},
+  {sx:-4.427,sz:4.023,ex:-4.018,ez:1.361,w:2.69,h:2.78,deg:-81.3},
+  {sx:-3.547,sz:5.437,ex:-3.222,ez:2.924,w:2.53,h:2.6,deg:-82.6},
+  {sx:-1.676,sz:5.211,ex:-4.66,ez:4.796,w:3.01,h:2.45,deg:-172.1},
+  {sx:-0.131,sz:3.016,ex:-0.785,ez:7.163,w:4.2,h:2.65,deg:99.0},
+  {sx:-0.982,sz:-2.852,ex:1.295,ez:-2.53,w:2.3,h:1.35,deg:8.1},
+  {sx:-3.514,sz:1.295,ex:-4.628,ez:1.113,w:1.13,h:2.3,deg:-170.7},
+  {sx:-3.589,sz:4.983,ex:-4.676,ez:4.814,w:1.1,h:1.15,deg:-171.1},
+  {sx:-0.624,sz:-2.817,ex:2.795,ez:-2.356,w:3.45,h:2.21,deg:7.7}
+];
+
+const rawWindows = [
+  {sx:3.061,sz:-1.235,ex:3.023,ez:-0.636,w:0.6,h:1.9},
+  {sx:3.308,sz:-0.957,ex:3.08,ez:0.929,w:1.9,h:1.25},
+  {sx:2.817,sz:2.415,ex:2.057,ez:2.337,w:0.76,h:1.75},
+  {sx:2.626,sz:1.755,ex:2.56,ez:2.301,w:0.55,h:1.8},
+  {sx:1.542,sz:2.547,ex:0.354,ez:2.376,w:1.2,h:1.15},
+  {sx:-0.727,sz:5.499,ex:-2.502,ez:5.198,w:1.8,h:1.35},
+  {sx:-0.034,sz:3.349,ex:-0.265,ez:4.831,w:1.5,h:2.0},
+  {sx:-0.078,sz:3.573,ex:-0.118,ez:3.871,w:0.3,h:0.85},
+  {sx:0.034,sz:2.927,ex:-0.006,ez:3.275,w:0.35,h:1.75},
+  {sx:3.304,sz:0.237,ex:3.152,ez:1.377,w:1.15,h:1.1}
+];
+
+// ═══════════════════════════════════════
+// MERGE OVERLAPPING WALL PLANES
+// ═══════════════════════════════════════
+
+function mergeWallPlanes(walls) {
+  // Separate into H and V based on angle
+  const hWalls = [];
+  const vWalls = [];
+
+  walls.forEach(w => {
+    const norm = Math.abs(w.deg) % 180;
+    const isH = norm < 30 || norm > 150;
+
+    // Straighten: compute perpendicular position
+    if (isH) {
+      const avgZ = (w.sz + w.ez) / 2;
+      const minX = Math.min(w.sx, w.ex);
+      const maxX = Math.max(w.sx, w.ex);
+      hWalls.push({ perpPos: avgZ, start: minX, end: maxX, h: w.h, isH: true });
+    } else {
+      const avgX = (w.sx + w.ex) / 2;
+      const minZ = Math.min(w.sz, w.ez);
+      const maxZ = Math.max(w.sz, w.ez);
+      vWalls.push({ perpPos: avgX, start: minZ, end: maxZ, h: w.h, isH: false });
+    }
+  });
+
+  function mergeGroup(group) {
+    if (group.length === 0) return [];
+
+    // Sort by perpendicular position
+    group.sort((a, b) => a.perpPos - b.perpPos);
+
+    // Group walls within 0.6m of each other
+    const clusters = [];
+    let cluster = [group[0]];
+
+    for (let i = 1; i < group.length; i++) {
+      if (Math.abs(group[i].perpPos - cluster[0].perpPos) < 0.6) {
+        cluster.push(group[i]);
+      } else {
+        clusters.push(cluster);
+        cluster = [group[i]];
+      }
+    }
+    clusters.push(cluster);
+
+    // Merge each cluster
+    return clusters.map(c => {
+      const avgPerp = c.reduce((s, w) => s + w.perpPos, 0) / c.length;
+      // Only use full-height walls (h > 1.5) for span, or all if none are full-height
+      const fullHeight = c.filter(w => w.h > 1.5);
+      const spanWalls = fullHeight.length > 0 ? fullHeight : c;
+      const minStart = Math.min(...spanWalls.map(w => w.start));
+      const maxEnd = Math.max(...spanWalls.map(w => w.end));
+      const maxH = Math.max(...c.map(w => w.h));
+      return {
+        perpPos: avgPerp,
+        start: minStart,
+        end: maxEnd,
+        h: Math.min(maxH, DOLLS_HEIGHT),
+        isH: c[0].isH,
+        segCount: c.length // how many planes merged
+      };
+    });
+  }
+
+  return [...mergeGroup(hWalls), ...mergeGroup(vWalls)];
+}
+
+const mergedWalls = mergeWallPlanes(rawWalls);
+
+// ═══════════════════════════════════════
+// THREE.JS SCENE
+// ═══════════════════════════════════════
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(6, 10, 12);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const ctrl = new OrbitControls(camera, renderer.domElement);
+ctrl.enableDamping = true;
+ctrl.dampingFactor = 0.08;
+ctrl.target.set(-1, 0, 0);
+ctrl.maxPolarAngle = Math.PI / 2;
+
+// ── Lighting ──
+scene.add(new THREE.AmbientLight(0xfff5e6, 0.6));
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+sun.position.set(8, 20, 6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.camera.left = -15; sun.shadow.camera.right = 15;
+sun.shadow.camera.top = 15; sun.shadow.camera.bottom = -15;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 40;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+scene.add(new THREE.DirectionalLight(0xffe8cc, 0.4)).position.set(-5, 8, -4);
+
+[[-3,1,1],[1,1,-1],[-1,1,3]].forEach(p => {
+  const pl = new THREE.PointLight(0xffeedd, 0.4, 10);
+  pl.position.set(...p);
+  scene.add(pl);
+});
+
+// ── Materials ──
+const wallMat = new THREE.MeshStandardMaterial({
+  color: 0xe8e0d4, roughness: 0.85, metalness: 0, side: THREE.DoubleSide
+});
+const rawWallMat = new THREE.MeshStandardMaterial({
+  color: 0xe8e0d4, roughness: 0.85, metalness: 0, side: THREE.DoubleSide,
+  transparent: true, opacity: 0.6
+});
+const rawEdgeMat = new THREE.LineBasicMaterial({ color: 0xf0a030, transparent: true, opacity: 0.8 });
+const wallTopMat = new THREE.LineBasicMaterial({ color: 0xd0c8bc });
+const floorMat = new THREE.MeshStandardMaterial({ color: 0xc8aa80, roughness: 0.75 });
+const glassMat = new THREE.MeshStandardMaterial({
+  color: 0xaaddee, transparent: true, opacity: 0.3,
+  roughness: 0.1, side: THREE.DoubleSide
+});
+const windowFrameMat = new THREE.LineBasicMaterial({ color: 0x88bbcc });
+
+// ── Floor ──
+const floorShape = new THREE.Shape();
+floorShape.moveTo(floorPolygon[0].x, -floorPolygon[0].z);
+for (let i = 1; i < floorPolygon.length; i++) {
+  floorShape.lineTo(floorPolygon[i].x, -floorPolygon[i].z);
+}
+floorShape.closePath();
+
+const floor = new THREE.Mesh(new THREE.ShapeGeometry(floorShape), floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = FLOOR_LEVEL;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(30, 30),
+  new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 1 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = FLOOR_LEVEL - 0.02;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// ── Groups for toggling ──
+const rawGroup = new THREE.Group();
+const mergedGroup = new THREE.Group();
+const windowGroup = new THREE.Group();
+scene.add(rawGroup);
+scene.add(mergedGroup);
+scene.add(windowGroup);
+
+// ── Raw plane walls (individual detections, semi-transparent) ──
+rawWalls.forEach(w => {
+  const dx = w.ex - w.sx;
+  const dz = w.ez - w.sz;
+  const len = Math.sqrt(dx * dx + dz * dz);
+  const angle = Math.atan2(dz, dx);
+  const h = Math.min(w.h, DOLLS_HEIGHT);
+
+  const geom = new THREE.BoxGeometry(len, h, 0.05);
+  const mesh = new THREE.Mesh(geom, rawWallMat);
+  const cx = (w.sx + w.ex) / 2;
+  const cz = (w.sz + w.ez) / 2;
+  mesh.position.set(cx, FLOOR_LEVEL + h / 2, -cz);
+  mesh.rotation.y = -angle;
+  rawGroup.add(mesh);
+
+  // Edge outline
+  const pts = [
+    new THREE.Vector3(w.sx, FLOOR_LEVEL, -w.sz),
+    new THREE.Vector3(w.ex, FLOOR_LEVEL, -w.ez),
+    new THREE.Vector3(w.ex, FLOOR_LEVEL + h, -w.ez),
+    new THREE.Vector3(w.sx, FLOOR_LEVEL + h, -w.sz),
+    new THREE.Vector3(w.sx, FLOOR_LEVEL, -w.sz)
+  ];
+  const lineGeom = new THREE.BufferGeometry().setFromPoints(pts);
+  rawGroup.add(new THREE.Line(lineGeom, rawEdgeMat));
+});
+rawGroup.visible = false; // start with merged view
+
+// ── Merged walls (clean, solid) ──
+mergedWalls.forEach(wall => {
+  const len = wall.end - wall.start;
+  const h = wall.h;
+  const thick = WALL_THICKNESS;
+
+  if (len < 0.1 || h < 0.1) return;
+
+  const cx = wall.start + len / 2;
+
+  const geom = new THREE.BoxGeometry(
+    wall.isH ? len : thick,
+    h,
+    wall.isH ? thick : len
+  );
+  const mesh = new THREE.Mesh(geom, wallMat);
+  mesh.position.set(
+    wall.isH ? cx : wall.perpPos,
+    FLOOR_LEVEL + h / 2,
+    wall.isH ? -wall.perpPos : -cx
+  );
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  mergedGroup.add(mesh);
+
+  // Top edge
+  const y = FLOOR_LEVEL + h;
+  if (wall.isH) {
+    addEdgeLine(mergedGroup, wall.start, y, -wall.perpPos, wall.end, y, -wall.perpPos);
+  } else {
+    addEdgeLine(mergedGroup, wall.perpPos, y, -wall.start, wall.perpPos, y, -wall.end);
+  }
+});
+
+// ── Windows (glass panes at actual detected positions) ──
+rawWindows.forEach(w => {
+  const dx = w.ex - w.sx;
+  const dz = w.ez - w.sz;
+  const len = Math.sqrt(dx * dx + dz * dz);
+  const angle = Math.atan2(dz, dx);
+  const h = Math.min(w.h, DOLLS_HEIGHT * 0.6);
+
+  // Glass pane
+  const geom = new THREE.BoxGeometry(len, h, 0.02);
+  const mesh = new THREE.Mesh(geom, glassMat);
+  const cx = (w.sx + w.ex) / 2;
+  const cz = (w.sz + w.ez) / 2;
+  // Position window at sill height (roughly 0.9m above floor)
+  mesh.position.set(cx, FLOOR_LEVEL + 0.9 + h / 2, -cz);
+  mesh.rotation.y = -angle;
+  windowGroup.add(mesh);
+
+  // Window frame
+  const sillY = FLOOR_LEVEL + 0.9;
+  const topY = sillY + h;
+  const pts = [
+    new THREE.Vector3(w.sx, sillY, -w.sz),
+    new THREE.Vector3(w.ex, sillY, -w.ez),
+    new THREE.Vector3(w.ex, topY, -w.ez),
+    new THREE.Vector3(w.sx, topY, -w.sz),
+    new THREE.Vector3(w.sx, sillY, -w.sz)
+  ];
+  const lineGeom = new THREE.BufferGeometry().setFromPoints(pts);
+  windowGroup.add(new THREE.Line(lineGeom, windowFrameMat));
+});
+
+function addEdgeLine(group, x1, y1, z1, x2, y2, z2) {
+  const p = [new THREE.Vector3(x1,y1,z1), new THREE.Vector3(x2,y2,z2)];
+  group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(p), wallTopMat));
+}
+
+// ── Controls ──
+function animateTo(pos, tgt, dur = 1200) {
+  const sp = camera.position.clone();
+  const st = ctrl.target.clone();
+  const ep = new THREE.Vector3(...pos);
+  const et = new THREE.Vector3(...tgt);
+  const t0 = performance.now();
+  function step(now) {
+    const t = Math.min((now - t0) / dur, 1);
+    const e = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2) / 2;
+    camera.position.lerpVectors(sp, ep, e);
+    ctrl.target.lerpVectors(st, et, e);
+    ctrl.update();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+document.getElementById('btnDolls').onclick = () => animateTo([6, 10, 12], [-1, 0, 0]);
+document.getElementById('btnTop').onclick = () => animateTo([-1, 16, 0], [-1, 0, 0]);
+document.getElementById('btnWalk').onclick = () => animateTo([-3, -0.5, 0], [0, -0.5, 2]);
+
+document.getElementById('btnRaw').onclick = () => {
+  rawGroup.visible = true;
+  mergedGroup.visible = false;
+  document.getElementById('label').textContent = 'RAW PLANE ANCHORS — 13 individual detections';
+};
+document.getElementById('btnMerged').onclick = () => {
+  rawGroup.visible = false;
+  mergedGroup.visible = true;
+  document.getElementById('label').textContent = 'MERGED PLANES — ' + mergedWalls.length + ' walls';
+};
+
+// ── Render ──
+(function loop() {
+  requestAnimationFrame(loop);
+  ctrl.update();
+  renderer.render(scene, camera);
+})();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0A5431429B7A2DFCD6790D42 /* ImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F761F791CD57EB188CB313 /* ImportTests.swift */; };
+		0A8EA8625697CC5AEC06D2FB /* BlueprintEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADC892969FC5A8305197BCEF /* BlueprintEditor.swift */; };
+		16077DC600D25365D26F2DF0 /* PDFExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 677CB1DC01AC9FC060F79CEA /* PDFExporter.swift */; };
+		2040159D8B99759F3609ECB6 /* BlueprintGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE1FACFA12637445785ACAF /* BlueprintGeometry.swift */; };
+		30E93DCFD2934F9C2F0CEA35 /* ProjectImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B2F834997286B159F9E4A0 /* ProjectImporter.swift */; };
+		39593ADE072BA3B3F0628B5C /* BlueprintRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122D1EAD76EA7388AF8E3FCE /* BlueprintRenderer.swift */; };
+		59B3B748426853B32A5B87E1 /* PDFExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CFFA770AFC4D72D4038AD01 /* PDFExportTests.swift */; };
+		6E2F52EC75241246C0490AAB /* ExportButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 428C3977AC7CB55A997E5104 /* ExportButton.swift */; };
+		70B834A3D1A50764AAFF0A0F /* FloorPlanExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3849F99C615D0BB56EE319D3 /* FloorPlanExtractor.swift */; };
+		93522A324189B74FB7350B8B /* RendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0CC59B0EC7B55DCF66D17 /* RendererTests.swift */; };
+		9CC7E69364DCB946ED3FBB99 /* BlueprintSymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78874DEA7E0B80B2E8725C93 /* BlueprintSymbols.swift */; };
+		A07212EB04702E44CD1999D0 /* BlueprintProjectDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A02C885589F445FC486B41A /* BlueprintProjectDetailView.swift */; };
+		A367C11D695F1E6A9B870E5E /* StudiioTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC2F7D543DD0E58C63C5272 /* StudiioTheme.swift */; };
+		AFF70645E8123BFE461AE7C1 /* PropertyProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E12F7F2B85971AD7DDF575D /* PropertyProject.swift */; };
+		B724D6D0E0D3E2D258210B11 /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1478E28301D657922CA6D9 /* IntegrationTests.swift */; };
+		C032B8359660A11ED94556A2 /* EditorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265AC0C3FFB8C4D8046759AE /* EditorTests.swift */; };
+		C4F2FA9F311F06685CD35C5E /* BonjourListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB68369BDB8B174D72FB997 /* BonjourListener.swift */; };
+		C5096B9E99F49A0E1F0A72DD /* iCloudWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82541DB221014AC6E10713C0 /* iCloudWatcher.swift */; };
+		D15A76B9F72B85F0276D3B59 /* EditorToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251B7AB528F13251278125ED /* EditorToolbar.swift */; };
+		F38F34AD350EFEA46FCEAA4F /* BlueprintMainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DAD429AD6BABD1FE76ED80E /* BlueprintMainView.swift */; };
+		F934AAF76ECCDA063A98B4E3 /* StudiioBlueprintApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8A295913625647F598B289 /* StudiioBlueprintApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D9CD0EE1AD2D96952E58C5E2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 55BE5EC8EE41CF64F603BB7B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2875AC35AF9D56E21650CF66;
+			remoteInfo = StudiioBlueprint;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		122D1EAD76EA7388AF8E3FCE /* BlueprintRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueprintRenderer.swift; sourceTree = "<group>"; };
+		251B7AB528F13251278125ED /* EditorToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorToolbar.swift; sourceTree = "<group>"; };
+		265AC0C3FFB8C4D8046759AE /* EditorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorTests.swift; sourceTree = "<group>"; };
+		2E1478E28301D657922CA6D9 /* IntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTests.swift; sourceTree = "<group>"; };
+		3849F99C615D0BB56EE319D3 /* FloorPlanExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorPlanExtractor.swift; sourceTree = "<group>"; };
+		3DAD429AD6BABD1FE76ED80E /* BlueprintMainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueprintMainView.swift; sourceTree = "<group>"; };
+		428C3977AC7CB55A997E5104 /* ExportButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportButton.swift; sourceTree = "<group>"; };
+		4A02C885589F445FC486B41A /* BlueprintProjectDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueprintProjectDetailView.swift; sourceTree = "<group>"; };
+		4CFFA770AFC4D72D4038AD01 /* PDFExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExportTests.swift; sourceTree = "<group>"; };
+		58BD31B44139FF1D868BB618 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		64F761F791CD57EB188CB313 /* ImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportTests.swift; sourceTree = "<group>"; };
+		677CB1DC01AC9FC060F79CEA /* PDFExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFExporter.swift; sourceTree = "<group>"; };
+		6BB68369BDB8B174D72FB997 /* BonjourListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourListener.swift; sourceTree = "<group>"; };
+		747BD43B6AABFA5433E7C23F /* StudiioBlueprintTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StudiioBlueprintTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		78874DEA7E0B80B2E8725C93 /* BlueprintSymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueprintSymbols.swift; sourceTree = "<group>"; };
+		7AC2F7D543DD0E58C63C5272 /* StudiioTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudiioTheme.swift; sourceTree = "<group>"; };
+		7E12F7F2B85971AD7DDF575D /* PropertyProject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyProject.swift; sourceTree = "<group>"; };
+		82541DB221014AC6E10713C0 /* iCloudWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudWatcher.swift; sourceTree = "<group>"; };
+		96B2F834997286B159F9E4A0 /* ProjectImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectImporter.swift; sourceTree = "<group>"; };
+		9A8A295913625647F598B289 /* StudiioBlueprintApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudiioBlueprintApp.swift; sourceTree = "<group>"; };
+		ADC892969FC5A8305197BCEF /* BlueprintEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueprintEditor.swift; sourceTree = "<group>"; };
+		C9D0CC59B0EC7B55DCF66D17 /* RendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RendererTests.swift; sourceTree = "<group>"; };
+		E0EB5F07BC0BF53108A47D21 /* StudiioBlueprint.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StudiioBlueprint.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7CAB67B05B7CB7100B7FF74 /* StudiioBlueprint.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StudiioBlueprint.entitlements; sourceTree = "<group>"; };
+		FCE1FACFA12637445785ACAF /* BlueprintGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueprintGeometry.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2292FFA62E1D0D946059AAAC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E0EB5F07BC0BF53108A47D21 /* StudiioBlueprint.app */,
+				747BD43B6AABFA5433E7C23F /* StudiioBlueprintTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		2C1F5875DDFACD8DBB615561 /* Editor */ = {
+			isa = PBXGroup;
+			children = (
+				ADC892969FC5A8305197BCEF /* BlueprintEditor.swift */,
+				251B7AB528F13251278125ED /* EditorToolbar.swift */,
+			);
+			path = Editor;
+			sourceTree = "<group>";
+		};
+		330040AC11D81D8BFD63BF45 /* StudiioBlueprintTests */ = {
+			isa = PBXGroup;
+			children = (
+				265AC0C3FFB8C4D8046759AE /* EditorTests.swift */,
+				64F761F791CD57EB188CB313 /* ImportTests.swift */,
+				2E1478E28301D657922CA6D9 /* IntegrationTests.swift */,
+				4CFFA770AFC4D72D4038AD01 /* PDFExportTests.swift */,
+				C9D0CC59B0EC7B55DCF66D17 /* RendererTests.swift */,
+			);
+			path = StudiioBlueprintTests;
+			sourceTree = "<group>";
+		};
+		3918B42E7BEF665B6624B851 /* Symbols */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Symbols;
+			sourceTree = "<group>";
+		};
+		7A18A9C001BB25A2E8D321D0 = {
+			isa = PBXGroup;
+			children = (
+				AF2AE2C24657812021438ED7 /* StudiioBlueprint */,
+				330040AC11D81D8BFD63BF45 /* StudiioBlueprintTests */,
+				2292FFA62E1D0D946059AAAC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7A3C34D45864CA3ECC33BA2E /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3DAD429AD6BABD1FE76ED80E /* BlueprintMainView.swift */,
+				4A02C885589F445FC486B41A /* BlueprintProjectDetailView.swift */,
+				9A8A295913625647F598B289 /* StudiioBlueprintApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		844D6674DE2CC74688BB5472 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				7AC2F7D543DD0E58C63C5272 /* StudiioTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		AA311BB18373686432622D87 /* PDF */ = {
+			isa = PBXGroup;
+			children = (
+				428C3977AC7CB55A997E5104 /* ExportButton.swift */,
+				677CB1DC01AC9FC060F79CEA /* PDFExporter.swift */,
+			);
+			path = PDF;
+			sourceTree = "<group>";
+		};
+		AF2AE2C24657812021438ED7 /* StudiioBlueprint */ = {
+			isa = PBXGroup;
+			children = (
+				58BD31B44139FF1D868BB618 /* Info.plist */,
+				E7CAB67B05B7CB7100B7FF74 /* StudiioBlueprint.entitlements */,
+				7A3C34D45864CA3ECC33BA2E /* App */,
+				2C1F5875DDFACD8DBB615561 /* Editor */,
+				F94285CACD0919BEB9DF3525 /* Import */,
+				C4EEE216444651B672CB1353 /* Models */,
+				AA311BB18373686432622D87 /* PDF */,
+				E0175B3033616360D86AB092 /* Renderer */,
+				B5D214A4D0CB1A109A9DFE89 /* Resources */,
+				3918B42E7BEF665B6624B851 /* Symbols */,
+				844D6674DE2CC74688BB5472 /* Theme */,
+			);
+			path = StudiioBlueprint;
+			sourceTree = "<group>";
+		};
+		B5D214A4D0CB1A109A9DFE89 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		C4EEE216444651B672CB1353 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				7E12F7F2B85971AD7DDF575D /* PropertyProject.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E0175B3033616360D86AB092 /* Renderer */ = {
+			isa = PBXGroup;
+			children = (
+				FCE1FACFA12637445785ACAF /* BlueprintGeometry.swift */,
+				122D1EAD76EA7388AF8E3FCE /* BlueprintRenderer.swift */,
+				78874DEA7E0B80B2E8725C93 /* BlueprintSymbols.swift */,
+				3849F99C615D0BB56EE319D3 /* FloorPlanExtractor.swift */,
+			);
+			path = Renderer;
+			sourceTree = "<group>";
+		};
+		F94285CACD0919BEB9DF3525 /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				6BB68369BDB8B174D72FB997 /* BonjourListener.swift */,
+				82541DB221014AC6E10713C0 /* iCloudWatcher.swift */,
+				96B2F834997286B159F9E4A0 /* ProjectImporter.swift */,
+			);
+			path = Import;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2875AC35AF9D56E21650CF66 /* StudiioBlueprint */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA2DD71107E5591758AB9CF5 /* Build configuration list for PBXNativeTarget "StudiioBlueprint" */;
+			buildPhases = (
+				B87F26595482E8101F201AB2 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StudiioBlueprint;
+			packageProductDependencies = (
+			);
+			productName = StudiioBlueprint;
+			productReference = E0EB5F07BC0BF53108A47D21 /* StudiioBlueprint.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C80ADE1CCDE41E0C8B48E81D /* StudiioBlueprintTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2610B7D7239E5E66D967EE9C /* Build configuration list for PBXNativeTarget "StudiioBlueprintTests" */;
+			buildPhases = (
+				CDE3BF0F293F2705AEEFE18B /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51111DDA06F955EB8DD71FA4 /* PBXTargetDependency */,
+			);
+			name = StudiioBlueprintTests;
+			packageProductDependencies = (
+			);
+			productName = StudiioBlueprintTests;
+			productReference = 747BD43B6AABFA5433E7C23F /* StudiioBlueprintTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		55BE5EC8EE41CF64F603BB7B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					2875AC35AF9D56E21650CF66 = {
+						DevelopmentTeam = EX4VAF26CQ;
+						ProvisioningStyle = Automatic;
+					};
+					C80ADE1CCDE41E0C8B48E81D = {
+						DevelopmentTeam = EX4VAF26CQ;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 14B0311FC3CB5BCD844A6430 /* Build configuration list for PBXProject "StudiioBlueprint" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7A18A9C001BB25A2E8D321D0;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2875AC35AF9D56E21650CF66 /* StudiioBlueprint */,
+				C80ADE1CCDE41E0C8B48E81D /* StudiioBlueprintTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B87F26595482E8101F201AB2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A8EA8625697CC5AEC06D2FB /* BlueprintEditor.swift in Sources */,
+				2040159D8B99759F3609ECB6 /* BlueprintGeometry.swift in Sources */,
+				F38F34AD350EFEA46FCEAA4F /* BlueprintMainView.swift in Sources */,
+				A07212EB04702E44CD1999D0 /* BlueprintProjectDetailView.swift in Sources */,
+				39593ADE072BA3B3F0628B5C /* BlueprintRenderer.swift in Sources */,
+				9CC7E69364DCB946ED3FBB99 /* BlueprintSymbols.swift in Sources */,
+				C4F2FA9F311F06685CD35C5E /* BonjourListener.swift in Sources */,
+				D15A76B9F72B85F0276D3B59 /* EditorToolbar.swift in Sources */,
+				6E2F52EC75241246C0490AAB /* ExportButton.swift in Sources */,
+				70B834A3D1A50764AAFF0A0F /* FloorPlanExtractor.swift in Sources */,
+				16077DC600D25365D26F2DF0 /* PDFExporter.swift in Sources */,
+				30E93DCFD2934F9C2F0CEA35 /* ProjectImporter.swift in Sources */,
+				AFF70645E8123BFE461AE7C1 /* PropertyProject.swift in Sources */,
+				F934AAF76ECCDA063A98B4E3 /* StudiioBlueprintApp.swift in Sources */,
+				A367C11D695F1E6A9B870E5E /* StudiioTheme.swift in Sources */,
+				C5096B9E99F49A0E1F0A72DD /* iCloudWatcher.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDE3BF0F293F2705AEEFE18B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C032B8359660A11ED94556A2 /* EditorTests.swift in Sources */,
+				0A5431429B7A2DFCD6790D42 /* ImportTests.swift in Sources */,
+				B724D6D0E0D3E2D258210B11 /* IntegrationTests.swift in Sources */,
+				59B3B748426853B32A5B87E1 /* PDFExportTests.swift in Sources */,
+				93522A324189B74FB7350B8B /* RendererTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		51111DDA06F955EB8DD71FA4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2875AC35AF9D56E21650CF66 /* StudiioBlueprint */;
+			targetProxy = D9CD0EE1AD2D96952E58C5E2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		40BF30BFC227A6317457AEC9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = EX4VAF26CQ;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.blueprint.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StudiioBlueprint.app/Contents/MacOS/StudiioBlueprint";
+			};
+			name = Release;
+		};
+		6638BE3836DC1E68B744A9EF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StudiioBlueprint/StudiioBlueprint.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EX4VAF26CQ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = StudiioBlueprint/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.blueprint;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Debug;
+		};
+		869AB686E856BBAA282E427D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		BE542A426C6F23DE8038A002 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = EX4VAF26CQ;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.blueprint.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StudiioBlueprint.app/Contents/MacOS/StudiioBlueprint";
+			};
+			name = Debug;
+		};
+		DB204C0BAADBF84BBC606B84 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E0322B9F0B74F54444DDF677 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StudiioBlueprint/StudiioBlueprint.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EX4VAF26CQ;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = StudiioBlueprint/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.blueprint;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		14B0311FC3CB5BCD844A6430 /* Build configuration list for PBXProject "StudiioBlueprint" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB204C0BAADBF84BBC606B84 /* Debug */,
+				869AB686E856BBAA282E427D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2610B7D7239E5E66D967EE9C /* Build configuration list for PBXNativeTarget "StudiioBlueprintTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE542A426C6F23DE8038A002 /* Debug */,
+				40BF30BFC227A6317457AEC9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EA2DD71107E5591758AB9CF5 /* Build configuration list for PBXNativeTarget "StudiioBlueprint" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6638BE3836DC1E68B744A9EF /* Debug */,
+				E0322B9F0B74F54444DDF677 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 55BE5EC8EE41CF64F603BB7B /* Project object */;
+}

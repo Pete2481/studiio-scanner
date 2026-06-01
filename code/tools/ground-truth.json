@@ -1,0 +1,258 @@
+{
+  "property": {
+    "address": "3 Fagan Place Cumbalum NSW 2478",
+    "lot": "654",
+    "design": "Monash 27",
+    "builder": "Coral Homes",
+    "total_area_m2": 318.54
+  },
+  "rooms": {
+    "rumpus": {
+      "name": "Rumpus",
+      "width_mm": 5950,
+      "depth_mm": 5000,
+      "area_m2": 29.75,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 70, "length_mm": 5950},
+        {"side": "south", "thickness_mm": 230, "length_mm": 5950},
+        {"side": "west", "thickness_mm": 70, "length_mm": 5000},
+        {"side": "east", "thickness_mm": 70, "length_mm": 5000}
+      ],
+      "doors": [
+        {"name": "Door to Bed 5", "width_mm": 820, "type": "standard", "wall": "west", "height_mm": 2100},
+        {"name": "Door to Ensuite 2", "width_mm": 820, "type": "solicore_x1", "wall": "east", "height_mm": 2100}
+      ],
+      "windows": [
+        {"name": "Sliding window", "label": "SW-1824", "width_mm": 1824, "type": "sliding", "wall": "south"}
+      ],
+      "openings": [
+        {"name": "Opening to Pantry/Kitchen", "width_mm": 2300, "wall": "south"}
+      ],
+      "fixtures": [
+        {"name": "Capped water point", "category": "plumbing", "width_mm": 200, "depth_mm": 200},
+        {"name": "Wall hung vanity", "category": "vanity", "width_mm": 500, "depth_mm": 750}
+      ]
+    },
+    "bed5": {
+      "name": "Bed 5",
+      "width_mm": 3220,
+      "depth_mm": 4400,
+      "area_m2": 14.17,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 230, "length_mm": 3220},
+        {"side": "south", "thickness_mm": 70, "length_mm": 3220},
+        {"side": "west", "thickness_mm": 230, "length_mm": 4400},
+        {"side": "east", "thickness_mm": 70, "length_mm": 4400}
+      ],
+      "doors": [
+        {"name": "Door to Rumpus", "width_mm": 810, "type": "standard", "wall": "east", "height_mm": 2100}
+      ],
+      "windows": [
+        {"name": "Awning window 1", "label": "AR 1806 AWN", "width_mm": 1806, "type": "awning", "wall": "west"},
+        {"name": "Awning window 2", "label": "AR 1806 AWN", "width_mm": 1806, "type": "awning", "wall": "west"},
+        {"name": "Awning window 3", "label": "AR 1806 AWN", "width_mm": 1806, "type": "awning", "wall": "west"}
+      ],
+      "openings": [],
+      "fixtures": [
+        {"name": "Robe 5", "category": "wardrobe", "width_mm": 1800, "depth_mm": 1070},
+        {"name": "Mirror S/D", "category": "mirror", "width_mm": 2100, "depth_mm": 1730}
+      ]
+    },
+    "ensuite2": {
+      "name": "Ensuite 2",
+      "width_mm": 3300,
+      "depth_mm": 2770,
+      "area_m2": 9.14,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 230, "length_mm": 3300},
+        {"side": "south", "thickness_mm": 70, "length_mm": 3300},
+        {"side": "west", "thickness_mm": 70, "length_mm": 2770},
+        {"side": "east", "thickness_mm": 230, "length_mm": 2770}
+      ],
+      "doors": [
+        {"name": "Door from Rumpus", "width_mm": 820, "type": "solicore_x1", "wall": "west", "height_mm": 2100}
+      ],
+      "windows": [
+        {"name": "Obscure window", "label": "OBS", "width_mm": 600, "type": "obscure", "wall": "north"}
+      ],
+      "openings": [],
+      "fixtures": [
+        {"name": "Shower", "category": "shower", "width_mm": 1100, "depth_mm": 1500},
+        {"name": "Wall hung vanity", "category": "vanity", "width_mm": 500, "depth_mm": 750},
+        {"name": "Toilet", "category": "toilet", "width_mm": 400, "depth_mm": 700}
+      ]
+    },
+    "bed6": {
+      "name": "Bed 6",
+      "width_mm": 3400,
+      "depth_mm": 3350,
+      "area_m2": 11.39,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 70, "length_mm": 3400},
+        {"side": "south", "thickness_mm": 70, "length_mm": 3400},
+        {"side": "west", "thickness_mm": 70, "length_mm": 3350},
+        {"side": "east", "thickness_mm": 230, "length_mm": 3350}
+      ],
+      "doors": [
+        {"name": "Door", "width_mm": 820, "type": "standard", "wall": "west", "height_mm": 2100}
+      ],
+      "windows": [
+        {"name": "Sliding window", "label": "SW-1218", "width_mm": 1218, "type": "sliding", "wall": "south"}
+      ],
+      "openings": [],
+      "fixtures": [
+        {"name": "Robe 6", "category": "wardrobe", "width_mm": 1800, "depth_mm": 1804},
+        {"name": "Mirror S/D", "category": "mirror", "width_mm": 2100, "depth_mm": 1730}
+      ]
+    },
+    "living": {
+      "name": "Living",
+      "width_mm": 3670,
+      "depth_mm": 3440,
+      "area_m2": 12.62,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 70, "length_mm": 3670},
+        {"side": "south", "thickness_mm": 70, "length_mm": 3670},
+        {"side": "west", "thickness_mm": 230, "length_mm": 3440},
+        {"side": "east", "thickness_mm": 70, "length_mm": 3440}
+      ],
+      "doors": [],
+      "windows": [
+        {"name": "Awning window 1", "label": "AR 1806 AWN", "width_mm": 1806, "type": "awning", "wall": "west"},
+        {"name": "Awning window 2", "label": "AR 1806 AWN", "width_mm": 1806, "type": "awning", "wall": "west"}
+      ],
+      "openings": [
+        {"name": "Opening to Entry", "width_mm": 1570, "wall": "south"}
+      ],
+      "fixtures": []
+    },
+    "family": {
+      "name": "Family",
+      "width_mm": 4250,
+      "depth_mm": 5280,
+      "area_m2": 22.44,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 70, "length_mm": 4250},
+        {"side": "south", "thickness_mm": 70, "length_mm": 4250},
+        {"side": "west", "thickness_mm": 70, "length_mm": 5280},
+        {"side": "east", "thickness_mm": 230, "length_mm": 5280}
+      ],
+      "doors": [
+        {"name": "Door", "width_mm": 820, "type": "standard", "wall": "various", "height_mm": 2100}
+      ],
+      "windows": [
+        {"name": "Sliding window", "label": "SW-1830", "width_mm": 1830, "type": "sliding", "wall": "east"}
+      ],
+      "openings": [],
+      "fixtures": [
+        {"name": "Dishwasher", "category": "dishwasher", "width_mm": 600, "depth_mm": 600},
+        {"name": "Fridge space", "category": "refrigerator", "width_mm": 1020, "depth_mm": 700},
+        {"name": "Wall hung vanity", "category": "vanity", "width_mm": 500, "depth_mm": 900},
+        {"name": "Stone bench", "category": "kitchen_bench", "width_mm": 2870, "depth_mm": 600},
+        {"name": "Breakfast bar", "category": "kitchen_island", "width_mm": 2200, "depth_mm": 600},
+        {"name": "Wall oven tower", "category": "oven", "width_mm": 600, "depth_mm": 600}
+      ]
+    },
+    "garage": {
+      "name": "Garage",
+      "width_mm": 6000,
+      "depth_mm": 6770,
+      "area_m2": 43.88,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 230, "length_mm": 6000},
+        {"side": "south", "thickness_mm": 230, "length_mm": 6000},
+        {"side": "west", "thickness_mm": 230, "length_mm": 6770},
+        {"side": "east", "thickness_mm": 230, "length_mm": 6770}
+      ],
+      "doors": [
+        {"name": "Sectional garage door", "width_mm": 4830, "type": "garage", "wall": "south", "height_mm": 2400},
+        {"name": "Door to house", "width_mm": 820, "type": "solicore_x1", "wall": "east", "height_mm": 2100}
+      ],
+      "windows": [
+        {"name": "Sliding window", "label": "SW-1818", "width_mm": 1818, "type": "sliding", "wall": "east"},
+        {"name": "Small window", "label": "SW-0512", "width_mm": 512, "type": "sliding", "wall": "south"}
+      ],
+      "openings": [],
+      "fixtures": [
+        {"name": "Wall mounted clothesline", "category": "custom", "width_mm": 705, "depth_mm": 200}
+      ]
+    },
+    "dining": {
+      "name": "Dining",
+      "width_mm": 3080,
+      "depth_mm": 3153,
+      "area_m2": 9.71,
+      "floor": "lower",
+      "walls": [
+        {"side": "north", "thickness_mm": 70, "length_mm": 3080},
+        {"side": "south", "thickness_mm": 230, "length_mm": 3080},
+        {"side": "west", "thickness_mm": 70, "length_mm": 3153},
+        {"side": "east", "thickness_mm": 70, "length_mm": 3153}
+      ],
+      "doors": [],
+      "windows": [
+        {"name": "Sliding window", "label": "SW-1224", "width_mm": 1224, "type": "sliding", "wall": "south"}
+      ],
+      "openings": [
+        {"name": "Stacker to outdoor living", "width_mm": 5130, "wall": "east", "type": "stacker"}
+      ],
+      "fixtures": [
+        {"name": "Staircase UP", "category": "stairs", "width_mm": 1000, "depth_mm": 2000},
+        {"name": "Balustrade", "category": "custom", "width_mm": 1050, "depth_mm": 70}
+      ]
+    },
+    "entry": {
+      "name": "Entry",
+      "width_mm": 1170,
+      "depth_mm": 1570,
+      "area_m2": 1.84,
+      "floor": "lower",
+      "walls": [],
+      "doors": [
+        {"name": "Front door", "width_mm": 1266, "type": "entry", "wall": "south", "height_mm": 2110}
+      ],
+      "windows": [],
+      "openings": [],
+      "fixtures": []
+    },
+    "laundry": {
+      "name": "Laundry",
+      "width_mm": 1500,
+      "depth_mm": 1300,
+      "area_m2": 1.95,
+      "floor": "lower",
+      "walls": [],
+      "doors": [],
+      "windows": [],
+      "openings": [],
+      "fixtures": [
+        {"name": "Washing machine", "category": "washer_dryer", "width_mm": 600, "depth_mm": 600},
+        {"name": "Laundry tub", "category": "laundry_tub", "width_mm": 500, "depth_mm": 500}
+      ]
+    },
+    "outdoor_living": {
+      "name": "Outdoor Living",
+      "width_mm": 2790,
+      "depth_mm": 3390,
+      "area_m2": 9.43,
+      "floor": "lower",
+      "walls": [],
+      "doors": [],
+      "windows": [],
+      "openings": [
+        {"name": "Stacker from dining", "width_mm": 5130, "wall": "west", "type": "stacker"}
+      ],
+      "fixtures": [
+        {"name": "Tap mains", "category": "plumbing", "width_mm": 100, "depth_mm": 100},
+        {"name": "Tap recycled", "category": "plumbing", "width_mm": 100, "depth_mm": 100}
+      ]
+    }
+  }
+}

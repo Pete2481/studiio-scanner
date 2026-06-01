@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Studiio Dolls House</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }
+  canvas { display: block; }
+  #controls {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px;
+  }
+  #controls button {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
+    color: #ccc; padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; transition: all 0.2s;
+  }
+  #controls button:hover { background: rgba(255,255,255,0.18); color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="controls">
+  <button id="btnDolls">Dolls House</button>
+  <button id="btnTop">Top Down</button>
+  <button id="btnWalk">Walk Through</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ═══════════════════════════════════════════════════════
+// SCAN DATA — from untitled-2026-05-19t09-01-30z.studiio
+// ═══════════════════════════════════════════════════════
+
+const FLOOR_LEVEL = -1.569;
+const CEILING_LEVEL = 1.091;
+const FULL_WALL_HEIGHT = CEILING_LEVEL - FLOOR_LEVEL; // 2.66m
+const DOLLS_HEIGHT = 1.8;
+const WALL_THICKNESS = 0.15;
+
+const floorPolygon = [
+  {x:-4.450069,z:-3.245081},{x:3.409869,z:-2.280003},{x:2.872926,z:2.093044},
+  {x:2.650323,z:2.602611},{x:-0.238899,z:5.477163},{x:-3.492887,z:5.077624},
+  {x:-8.275406,z:0.724202}
+];
+
+// 10 walls (down from 13 — merge working!)
+const walls = [
+  {id:"82382E0D",startX:-4.450069,startZ:-3.245081,endX:3.409869,endZ:-2.280003,angle:0,thick:0.066},
+  {id:"27D38306",startX:-3.751095,startZ:-2.566152,endX:3.338126,endZ:-1.695706,angle:0,thick:0.054},
+  {id:"729029ED",startX:-7.184095,startZ:-0.306454,endX:3.013804,endZ:0.945689,angle:0,thick:0.047},
+  {id:"6A1FA7E4",startX:-8.275406,startZ:0.724202,endX:2.872926,endZ:2.093044,angle:0,thick:0.039},
+  {id:"A1E0FAC2",startX:-2.191088,startZ:2.008161,endX:2.650323,endZ:2.602611,angle:0,thick:0.061},
+  {id:"0DCA543C",startX:-3.492887,startZ:5.077624,endX:-0.238899,endZ:5.477163,angle:0,thick:0.058},
+  {id:"52F7E39B",startX:-4.553197,startZ:-3.150449,endX:-3.679352,endZ:3.966452,angle:1.5708,thick:0.430,exterior:true},
+  {id:"54AE61AC",startX:-3.492887,startZ:-3.005689,endX:-2.500381,endZ:5.077624,angle:1.5708,thick:0.047},
+  {id:"B448DD29",startX:0.753606,startZ:-2.606150,endX:-0.238899,endZ:5.477163,angle:1.5708,thick:0.037},
+  {id:"5784D779",startX:3.409869,startZ:-2.280003,endX:2.872926,endZ:2.093044,angle:1.5708,thick:0.197,exterior:true}
+];
+
+// 18 openings
+const openings = [
+  {kind:"window",posX:1.261264,posZ:-1.950713,width:3.1,sill:0.9,wallID:"27D38306"},
+  {kind:"door",posX:-6.141922,posZ:-0.178492,width:2.1,sill:0,wallID:"729029ED"},
+  {kind:"window",posX:-2.916147,posZ:0.217583,width:2.6,sill:0.9,wallID:"729029ED"},
+  {kind:"window",posX:-0.137018,posZ:0.558817,width:2.6,sill:0.9,wallID:"729029ED"},
+  {kind:"window",posX:1.798447,posZ:0.796462,width:1.1,sill:0.9,wallID:"729029ED"},
+  {kind:"door",posX:-1.972738,posZ:1.498071,width:3.9,sill:0,wallID:"6A1FA7E4"},
+  {kind:"door",posX:-1.248170,posZ:2.123937,width:0.7,sill:0,wallID:"A1E0FAC2"},
+  {kind:"door",posX:-0.454133,posZ:2.221432,width:0.7,sill:0,wallID:"A1E0FAC2"},
+  {kind:"window",posX:-2.401086,posZ:5.211680,width:0.6,sill:0.9,wallID:"0DCA543C"},
+  {kind:"door",posX:-3.795128,posZ:-2.207530,width:0.7,sill:0,wallID:"52F7E39B"},
+  {kind:"door",posX:-4.093708,posZ:0.224208,width:1.8,sill:0,wallID:"52F7E39B"},
+  {kind:"door",posX:-4.300885,posZ:1.911536,width:1.4,sill:0,wallID:"52F7E39B"},
+  {kind:"door",posX:-2.683185,posZ:-1.516870,width:1.8,sill:0,wallID:"54AE61AC"},
+  {kind:"window",posX:-2.975672,posZ:0.865241,width:2.8,sill:0.9,wallID:"54AE61AC"},
+  {kind:"window",posX:0.509868,posZ:-0.621058,width:3.8,sill:0.9,wallID:"B448DD29"},
+  {kind:"window",posX:-0.160413,posZ:4.837946,width:0.8,sill:0.9,wallID:"B448DD29"},
+  {kind:"door",posX:3.373308,posZ:-1.982239,width:0.6,sill:0,wallID:"5784D779"},
+  {kind:"door",posX:3.245345,posZ:-0.940065,width:0.5,sill:0,wallID:"5784D779"}
+];
+
+// ═══════════════════════════════════════════════
+// STRAIGHTEN WALLS
+// ═══════════════════════════════════════════════
+
+function straightenWall(w) {
+  const isH = w.angle < 1;
+  if (isH) {
+    const avgZ = (w.startZ + w.endZ) / 2;
+    const minX = Math.min(w.startX, w.endX);
+    const maxX = Math.max(w.startX, w.endX);
+    return { ...w, isH: true, perpPos: avgZ, wallStart: minX, wallEnd: maxX, length: maxX - minX };
+  } else {
+    const avgX = (w.startX + w.endX) / 2;
+    const minZ = Math.min(w.startZ, w.endZ);
+    const maxZ = Math.max(w.startZ, w.endZ);
+    return { ...w, isH: false, perpPos: avgX, wallStart: minZ, wallEnd: maxZ, length: maxZ - minZ };
+  }
+}
+
+const straightWalls = walls.map(straightenWall);
+
+// ═══════════════════════════════════════════════════
+// BUILD WALL SEGMENTS
+// ═══════════════════════════════════════════════════
+
+function buildSegments(wall) {
+  const wh = DOLLS_HEIGHT;
+  const wStart = wall.wallStart;
+  const wEnd = wall.wallEnd;
+
+  const wallOpenings = openings
+    .filter(o => o.wallID === wall.id)
+    .map(o => {
+      const posAlong = wall.isH ? o.posX : o.posZ;
+      return { ...o, posAlong };
+    })
+    .sort((a, b) => a.posAlong - b.posAlong);
+
+  if (wallOpenings.length === 0) {
+    return [{ start: wStart, end: wEnd, bottom: 0, top: wh, type: 'wall' }];
+  }
+
+  const segs = [];
+  let cursor = wStart;
+
+  wallOpenings.forEach(op => {
+    const left = Math.max(wStart, op.posAlong - op.width / 2);
+    const right = Math.min(wEnd, op.posAlong + op.width / 2);
+    const isDoor = op.sill < 0.1;
+
+    if (left > cursor + 0.02) {
+      segs.push({ start: cursor, end: left, bottom: 0, top: wh, type: 'wall' });
+    }
+
+    if (isDoor) {
+      const doorTop = Math.min(2.04, wh);
+      if (doorTop < wh - 0.05) {
+        segs.push({ start: left, end: right, bottom: doorTop, top: wh, type: 'wall' });
+      }
+    } else {
+      if (op.sill > 0.05) {
+        segs.push({ start: left, end: right, bottom: 0, top: op.sill, type: 'wall' });
+      }
+      const winTop = Math.min(op.sill + 1.1, wh);
+      segs.push({ start: left, end: right, bottom: op.sill, top: winTop, type: 'glass' });
+      if (winTop < wh - 0.05) {
+        segs.push({ start: left, end: right, bottom: winTop, top: wh, type: 'wall' });
+      }
+    }
+
+    cursor = right;
+  });
+
+  if (wEnd > cursor + 0.02) {
+    segs.push({ start: cursor, end: wEnd, bottom: 0, top: wh, type: 'wall' });
+  }
+
+  return segs;
+}
+
+// ═══════════════════════
+// THREE.JS SCENE
+// ═══════════════════════
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(6, 10, 12);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const ctrl = new OrbitControls(camera, renderer.domElement);
+ctrl.enableDamping = true;
+ctrl.dampingFactor = 0.08;
+ctrl.target.set(-2, 0, 0);
+ctrl.maxPolarAngle = Math.PI / 2;
+
+// ── Lighting ──
+scene.add(new THREE.AmbientLight(0xfff5e6, 0.6));
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+sun.position.set(8, 20, 6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.camera.left = -15;
+sun.shadow.camera.right = 15;
+sun.shadow.camera.top = 15;
+sun.shadow.camera.bottom = -15;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 40;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xffe8cc, 0.4);
+fill.position.set(-5, 8, -4);
+scene.add(fill);
+
+const pts = [[-3,1.5,1], [1,1.5,-1], [-1,1.5,3]];
+pts.forEach(p => {
+  const pl = new THREE.PointLight(0xffeedd, 0.3, 8);
+  pl.position.set(...p);
+  scene.add(pl);
+});
+
+// ── Materials ──
+const wallMat = new THREE.MeshStandardMaterial({
+  color: 0xe8e0d4, roughness: 0.85, metalness: 0, side: THREE.DoubleSide
+});
+const extWallMat = new THREE.MeshStandardMaterial({
+  color: 0xd8d0c4, roughness: 0.9, metalness: 0, side: THREE.DoubleSide
+});
+const wallTopMat = new THREE.LineBasicMaterial({ color: 0xd0c8bc });
+const floorMat = new THREE.MeshStandardMaterial({
+  color: 0xc8aa80, roughness: 0.75, metalness: 0
+});
+const glassMat = new THREE.MeshStandardMaterial({
+  color: 0xaaddee, transparent: true, opacity: 0.25,
+  roughness: 0.1, metalness: 0.1, side: THREE.DoubleSide
+});
+
+// ── Floor ──
+const floorShape = new THREE.Shape();
+floorShape.moveTo(floorPolygon[0].x, -floorPolygon[0].z);
+for (let i = 1; i < floorPolygon.length; i++) {
+  floorShape.lineTo(floorPolygon[i].x, -floorPolygon[i].z);
+}
+floorShape.closePath();
+
+const floor = new THREE.Mesh(new THREE.ShapeGeometry(floorShape), floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = FLOOR_LEVEL;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(30, 30),
+  new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 1 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = FLOOR_LEVEL - 0.02;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// ── Build Walls ──
+straightWalls.forEach(wall => {
+  const segments = buildSegments(wall);
+  // Use actual thickness for exterior walls, minimum for interior
+  const thick = wall.exterior ? Math.max(wall.thick, WALL_THICKNESS) : WALL_THICKNESS;
+
+  segments.forEach(seg => {
+    const len = seg.end - seg.start;
+    const h = seg.top - seg.bottom;
+    if (len < 0.01 || h < 0.01) return;
+
+    const cx = seg.start + len / 2;
+    const mat = seg.type === 'glass' ? glassMat : (wall.exterior ? extWallMat : wallMat);
+    const t = seg.type === 'glass' ? 0.02 : thick;
+
+    const geom = new THREE.BoxGeometry(
+      wall.isH ? len : t,
+      h,
+      wall.isH ? t : len
+    );
+    const mesh = new THREE.Mesh(geom, mat);
+
+    mesh.position.set(
+      wall.isH ? cx : wall.perpPos,
+      FLOOR_LEVEL + seg.bottom + h / 2,
+      wall.isH ? -wall.perpPos : -cx
+    );
+
+    mesh.castShadow = seg.type === 'wall';
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+  });
+
+  // Top edge line
+  const y = FLOOR_LEVEL + DOLLS_HEIGHT;
+  if (wall.isH) {
+    addEdgeLine(wall.wallStart, y, -wall.perpPos, wall.wallEnd, y, -wall.perpPos);
+  } else {
+    addEdgeLine(wall.perpPos, y, -wall.wallStart, wall.perpPos, y, -wall.wallEnd);
+  }
+});
+
+function addEdgeLine(x1, y1, z1, x2, y2, z2) {
+  const p = [new THREE.Vector3(x1,y1,z1), new THREE.Vector3(x2,y2,z2)];
+  const geom = new THREE.BufferGeometry().setFromPoints(p);
+  scene.add(new THREE.Line(geom, wallTopMat));
+}
+
+// ── Camera animation ──
+function animateTo(pos, tgt, dur = 1200) {
+  const sp = camera.position.clone();
+  const st = ctrl.target.clone();
+  const ep = new THREE.Vector3(...pos);
+  const et = new THREE.Vector3(...tgt);
+  const t0 = performance.now();
+  function step(now) {
+    const t = Math.min((now - t0) / dur, 1);
+    const e = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+    camera.position.lerpVectors(sp, ep, e);
+    ctrl.target.lerpVectors(st, et, e);
+    ctrl.update();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+document.getElementById('btnDolls').onclick = () => animateTo([6, 10, 12], [-2, 0, 0]);
+document.getElementById('btnTop').onclick = () => animateTo([-2, 16, 0], [-2, 0, 0]);
+document.getElementById('btnWalk').onclick = () => animateTo([-3, -0.5, 0], [0, -0.5, 2]);
+
+// ── Render loop ──
+(function loop() {
+  requestAnimationFrame(loop);
+  ctrl.update();
+  renderer.render(scene, camera);
+})();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Studiio Dolls House — Hybrid</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }
+  canvas { display: block; }
+  #label {
+    position: absolute; top: 16px; left: 16px; color: rgba(255,255,255,0.35);
+    font-size: 11px; pointer-events: none; letter-spacing: 1px;
+  }
+  #controls {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px;
+  }
+  #controls button {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25);
+    color: #ccc; padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; transition: all 0.2s;
+  }
+  #controls button:hover { background: rgba(255,255,255,0.18); color: #fff; }
+</style>
+</head>
+<body>
+
+<div id="label">HYBRID — RANSAC + PLANE ANCHORS</div>
+
+<div id="controls">
+  <button id="btnDolls">Dolls House</button>
+  <button id="btnTop">Top Down</button>
+  <button id="btnWalk">Walk Through</button>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const FLOOR_LEVEL = -1.569;
+const DOLLS_HEIGHT = 1.8;
+const WALL_THICK = 0.15;
+const EXT_THICK = 0.30;
+
+const floorPolygon = [
+  {x:-4.450069,z:-3.245081},{x:3.409869,z:-2.280003},{x:2.872926,z:2.093044},
+  {x:2.650323,z:2.602611},{x:-0.238899,z:5.477163},{x:-3.492887,z:5.077624},
+  {x:-8.275406,z:0.724202}
+];
+
+// ═══════════════════════════════════════
+// HYBRID WALL DATA (RANSAC + plane snap)
+// Walls 0+1 deduped (both snapped to same Z)
+// ═══════════════════════════════════════
+
+const walls = [
+  // South wall (merged 0+1, plane-snapped, 7 planes confirm X:-2.5 to 2.8)
+  {id:"south", isH:true, perp:-2.436, start:-4.45, end:3.41, ext:false,
+   confirmed:[[-2.522, 2.795]],
+   openings:[{posA:1.261, w:3.1, sill:0.9, kind:"window"}]},
+
+  // Main mid-wall (Z=-0.10, 10.2m, plane confirms only X:-4.9 to -4.3)
+  {id:"mid", isH:true, perp:-0.102, start:-7.184, end:3.014, ext:false,
+   confirmed:[[-4.924, -4.255]],
+   openings:[
+     {posA:-6.142, w:2.1, sill:0, kind:"slidingDoor"},
+     {posA:-2.916, w:2.6, sill:0.9, kind:"window"},
+     {posA:-0.137, w:2.6, sill:0.9, kind:"window"},
+     {posA:1.798, w:1.1, sill:0.9, kind:"window"}
+   ]},
+
+  // Interior wall Z=1.20 (11.1m, plane confirms X:-4.6 to -3.5)
+  {id:"interior1", isH:true, perp:1.204, start:-8.275, end:2.873, ext:false,
+   confirmed:[[-4.628, -3.514]],
+   openings:[{posA:-1.973, w:3.9, sill:0, kind:"garageDoor"}]},
+
+  // Interior wall Z=2.38 (4.8m, plane confirms X:0.3 to 2.2)
+  {id:"interior2", isH:true, perp:2.377, start:-2.191, end:2.65, ext:false,
+   confirmed:[[0.305, 2.218]],
+   openings:[
+     {posA:-1.248, w:0.7, sill:0, kind:"standardDoor"},
+     {posA:-0.454, w:0.7, sill:0, kind:"standardDoor"}
+   ]},
+
+  // North wall Z=4.95 (3.3m, plane confirms X:-4.7 to -1.7)
+  {id:"north", isH:true, perp:4.951, start:-3.493, end:-0.239, ext:false,
+   confirmed:[[-4.676, -1.676]],
+   openings:[{posA:-2.401, w:0.6, sill:0.9, kind:"window"}]},
+
+  // West exterior X=-4.18 (7.1m, planes confirm Z:-0.7 to 0.0 and 1.1 to 4.0)
+  {id:"west", isH:false, perp:-4.183, start:-3.15, end:3.966, ext:true,
+   confirmed:[[-0.673, -0.038], [1.081, 4.023]],
+   openings:[
+     {posA:-2.208, w:0.7, sill:0, kind:"standardDoor"},
+     {posA:0.224, w:1.8, sill:0, kind:"slidingDoor"},
+     {posA:1.912, w:1.4, sill:0, kind:"doubleDoor"}
+   ]},
+
+  // West interior X=-3.38 (8.1m, plane confirms Z:2.9 to 5.4)
+  {id:"westint", isH:false, perp:-3.385, start:-3.006, end:5.078, ext:false,
+   confirmed:[[2.924, 5.437]],
+   openings:[
+     {posA:-1.517, w:1.8, sill:0, kind:"slidingDoor"},
+     {posA:0.865, w:2.8, sill:0.9, kind:"window"}
+   ]},
+
+  // Interior vertical X=0.26 (8.1m, RANSAC-only, no plane match)
+  {id:"divider", isH:false, perp:0.257, start:-2.606, end:5.477, ext:false,
+   confirmed:[],
+   openings:[
+     {posA:-0.621, w:3.8, sill:0.9, kind:"window"},
+     {posA:4.838, w:0.8, sill:0.9, kind:"window"}
+   ]},
+
+  // East exterior X=3.03 (4.4m, plane confirms Z:-2.2 to -1.5)
+  {id:"east", isH:false, perp:3.029, start:-2.28, end:2.093, ext:true,
+   confirmed:[[-2.157, -1.466]],
+   openings:[
+     {posA:-1.982, w:0.6, sill:0, kind:"standardDoor"},
+     {posA:-0.940, w:0.5, sill:0, kind:"openingPassthrough"}
+   ]}
+];
+
+// Plane anchor windows (rendered separately at actual detected positions)
+const planeWindows = [
+  {sx:3.061,sz:-1.235,ex:3.023,ez:-0.636,h:1.9},
+  {sx:3.308,sz:-0.957,ex:3.08,ez:0.929,h:1.25},
+  {sx:2.817,sz:2.415,ex:2.057,ez:2.337,h:1.75},
+  {sx:2.626,sz:1.755,ex:2.56,ez:2.301,h:1.8},
+  {sx:1.542,sz:2.547,ex:0.354,ez:2.376,h:1.15},
+  {sx:-0.727,sz:5.499,ex:-2.502,ez:5.198,h:1.35},
+  {sx:-0.034,sz:3.349,ex:-0.265,ez:4.831,h:2.0},
+  {sx:0.034,sz:2.927,ex:-0.006,ez:3.275,h:1.75}
+];
+
+// ═══════════════════════════════════════
+// BUILD WALL SEGMENTS WITH OPENINGS
+// ═══════════════════════════════════════
+
+function buildWallSegments(wall) {
+  const wh = DOLLS_HEIGHT;
+  const wStart = wall.start;
+  const wEnd = wall.end;
+
+  // Sort openings by position
+  const ops = (wall.openings || []).slice().sort((a, b) => a.posA - b.posA);
+
+  if (ops.length === 0) {
+    return [{ start: wStart, end: wEnd, bottom: 0, top: wh, type: 'wall' }];
+  }
+
+  const segs = [];
+  let cursor = wStart;
+
+  ops.forEach(op => {
+    const left = Math.max(wStart, op.posA - op.w / 2);
+    const right = Math.min(wEnd, op.posA + op.w / 2);
+    const isDoor = op.sill < 0.1;
+
+    // Wall before opening
+    if (left > cursor + 0.05) {
+      segs.push({ start: cursor, end: left, bottom: 0, top: wh, type: 'wall' });
+    }
+
+    if (isDoor) {
+      // No wall where door is (full gap in dolls house view)
+    } else {
+      // Window: wall below sill
+      if (op.sill > 0.05) {
+        segs.push({ start: left, end: right, bottom: 0, top: op.sill, type: 'wall' });
+      }
+      // Glass
+      const winTop = Math.min(op.sill + 1.1, wh);
+      segs.push({ start: left, end: right, bottom: op.sill, top: winTop, type: 'glass' });
+      // Wall above window
+      if (winTop < wh - 0.05) {
+        segs.push({ start: left, end: right, bottom: winTop, top: wh, type: 'wall' });
+      }
+    }
+
+    cursor = right;
+  });
+
+  // Wall after last opening
+  if (wEnd > cursor + 0.05) {
+    segs.push({ start: cursor, end: wEnd, bottom: 0, top: wh, type: 'wall' });
+  }
+
+  return segs;
+}
+
+// Classify each segment as confirmed or unconfirmed
+function classifySegment(seg, confirmedSpans) {
+  if (confirmedSpans.length === 0) return 'unconfirmed';
+  const mid = (seg.start + seg.end) / 2;
+  for (const [cs, ce] of confirmedSpans) {
+    // Segment overlaps with confirmed span (with tolerance)
+    if (seg.end >= cs - 0.5 && seg.start <= ce + 0.5) return 'confirmed';
+  }
+  return 'unconfirmed';
+}
+
+// ═══════════════════════
+// THREE.JS SCENE
+// ═══════════════════════
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(6, 10, 12);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const ctrl = new OrbitControls(camera, renderer.domElement);
+ctrl.enableDamping = true;
+ctrl.dampingFactor = 0.08;
+ctrl.target.set(-1, 0, 0);
+ctrl.maxPolarAngle = Math.PI / 2;
+
+// ── Lighting ──
+scene.add(new THREE.AmbientLight(0xfff5e6, 0.6));
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+sun.position.set(8, 20, 6);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.camera.left = -15; sun.shadow.camera.right = 15;
+sun.shadow.camera.top = 15; sun.shadow.camera.bottom = -15;
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 40;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xffe8cc, 0.4);
+fill.position.set(-5, 8, -4);
+scene.add(fill);
+
+[[-3,1,1],[1,1,-1],[-1,1,3],[-5,1,0]].forEach(p => {
+  const pl = new THREE.PointLight(0xffeedd, 0.3, 10);
+  pl.position.set(...p);
+  scene.add(pl);
+});
+
+// ── Materials ──
+const confirmedMat = new THREE.MeshStandardMaterial({
+  color: 0xe8e0d4, roughness: 0.85, metalness: 0, side: THREE.DoubleSide
+});
+const unconfirmedMat = new THREE.MeshStandardMaterial({
+  color: 0xd8d0c4, roughness: 0.85, metalness: 0, side: THREE.DoubleSide,
+  transparent: true, opacity: 0.45
+});
+const extMat = new THREE.MeshStandardMaterial({
+  color: 0xddd5c8, roughness: 0.9, metalness: 0, side: THREE.DoubleSide
+});
+const extUnconfMat = new THREE.MeshStandardMaterial({
+  color: 0xddd5c8, roughness: 0.9, metalness: 0, side: THREE.DoubleSide,
+  transparent: true, opacity: 0.45
+});
+const glassMat = new THREE.MeshStandardMaterial({
+  color: 0xaaddee, transparent: true, opacity: 0.25,
+  roughness: 0.1, metalness: 0.1, side: THREE.DoubleSide
+});
+const wallTopMat = new THREE.LineBasicMaterial({ color: 0xd0c8bc });
+const wallTopDimMat = new THREE.LineBasicMaterial({ color: 0xd0c8bc, transparent: true, opacity: 0.3 });
+const floorMat = new THREE.MeshStandardMaterial({ color: 0xc8aa80, roughness: 0.75 });
+const windowFrameMat = new THREE.LineBasicMaterial({ color: 0x88bbcc });
+
+// ── Floor ──
+const floorShape = new THREE.Shape();
+floorShape.moveTo(floorPolygon[0].x, -floorPolygon[0].z);
+for (let i = 1; i < floorPolygon.length; i++) {
+  floorShape.lineTo(floorPolygon[i].x, -floorPolygon[i].z);
+}
+floorShape.closePath();
+
+const floor = new THREE.Mesh(new THREE.ShapeGeometry(floorShape), floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = FLOOR_LEVEL;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(30, 30),
+  new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 1 })
+);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = FLOOR_LEVEL - 0.02;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// ── Build Walls ──
+walls.forEach(wall => {
+  const segments = buildWallSegments(wall);
+  const thick = wall.ext ? EXT_THICK : WALL_THICK;
+
+  segments.forEach(seg => {
+    const len = seg.end - seg.start;
+    const h = seg.top - seg.bottom;
+    if (len < 0.01 || h < 0.01) return;
+
+    const cx = seg.start + len / 2;
+    const conf = classifySegment(seg, wall.confirmed);
+    const isGlass = seg.type === 'glass';
+
+    let mat;
+    if (isGlass) {
+      mat = glassMat;
+    } else if (wall.ext) {
+      mat = conf === 'confirmed' ? extMat : extUnconfMat;
+    } else {
+      mat = conf === 'confirmed' ? confirmedMat : unconfirmedMat;
+    }
+
+    const t = isGlass ? 0.02 : thick;
+
+    const geom = new THREE.BoxGeometry(
+      wall.isH ? len : t,
+      h,
+      wall.isH ? t : len
+    );
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.position.set(
+      wall.isH ? cx : wall.perp,
+      FLOOR_LEVEL + seg.bottom + h / 2,
+      wall.isH ? -wall.perp : -cx
+    );
+    mesh.castShadow = !isGlass && conf === 'confirmed';
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+  });
+
+  // Top edge line
+  const y = FLOOR_LEVEL + DOLLS_HEIGHT;
+  const hasConf = wall.confirmed.length > 0;
+  const lineMat = hasConf ? wallTopMat : wallTopDimMat;
+  if (wall.isH) {
+    addLine(wall.start, y, -wall.perp, wall.end, y, -wall.perp, lineMat);
+  } else {
+    addLine(wall.perp, y, -wall.start, wall.perp, y, -wall.end, lineMat);
+  }
+});
+
+// ── Plane anchor windows ──
+planeWindows.forEach(w => {
+  const dx = w.ex - w.sx;
+  const dz = w.ez - w.sz;
+  const len = Math.sqrt(dx * dx + dz * dz);
+  const angle = Math.atan2(dz, dx);
+  const h = Math.min(w.h, 1.5);
+  const sillY = FLOOR_LEVEL + 0.9;
+
+  const geom = new THREE.BoxGeometry(len, h, 0.02);
+  const mesh = new THREE.Mesh(geom, glassMat);
+  const cx = (w.sx + w.ex) / 2;
+  const cz = (w.sz + w.ez) / 2;
+  mesh.position.set(cx, sillY + h / 2, -cz);
+  mesh.rotation.y = -angle;
+  scene.add(mesh);
+
+  // Frame
+  const pts = [
+    new THREE.Vector3(w.sx, sillY, -w.sz),
+    new THREE.Vector3(w.ex, sillY, -w.ez),
+    new THREE.Vector3(w.ex, sillY + h, -w.ez),
+    new THREE.Vector3(w.sx, sillY + h, -w.sz),
+    new THREE.Vector3(w.sx, sillY, -w.sz)
+  ];
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), windowFrameMat));
+});
+
+function addLine(x1, y1, z1, x2, y2, z2, mat) {
+  const p = [new THREE.Vector3(x1,y1,z1), new THREE.Vector3(x2,y2,z2)];
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(p), mat));
+}
+
+// ── Camera ──
+function animateTo(pos, tgt, dur = 1200) {
+  const sp = camera.position.clone();
+  const st = ctrl.target.clone();
+  const ep = new THREE.Vector3(...pos);
+  const et = new THREE.Vector3(...tgt);
+  const t0 = performance.now();
+  function step(now) {
+    const t = Math.min((now - t0) / dur, 1);
+    const e = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2) / 2;
+    camera.position.lerpVectors(sp, ep, e);
+    ctrl.target.lerpVectors(st, et, e);
+    ctrl.update();
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+document.getElementById('btnDolls').onclick = () => animateTo([6, 10, 12], [-1, 0, 0]);
+document.getElementById('btnTop').onclick = () => animateTo([-1, 16, 0], [-1, 0, 0]);
+document.getElementById('btnWalk').onclick = () => animateTo([-4, -0.5, 0], [0, -0.5, 2]);
+
+// ── Render ──
+(function loop() {
+  requestAnimationFrame(loop);
+  ctrl.update();
+  renderer.render(scene, camera);
+})();
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+</script>
+</body>
+</html>

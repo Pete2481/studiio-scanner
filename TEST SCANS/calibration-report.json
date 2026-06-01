@@ -1,0 +1,20 @@
+{
+  "expected_doors" : 2,
+  "expected_fixtures" : 8,
+  "expected_openings" : 2,
+  "expected_windows" : 4,
+  "floor_coverage_pct" : 82.405494689941406,
+  "measured_depth_mm" : 8052.4990234375,
+  "measured_width_mm" : 7231.4111328125,
+  "multi_room" : true,
+  "objects_detected" : 21,
+  "openings_detected" : 21,
+  "ref_area_m2" : 46.610000610351562,
+  "ref_depth_mm" : 0,
+  "ref_width_mm" : 0,
+  "room" : "living+family+dining+entry",
+  "room_name" : "Living + Family + Dining + Entry",
+  "timestamp" : "2026-05-18T21:54:33Z",
+  "vertices" : 413388,
+  "walls" : 15
+}

@@ -1,0 +1,56 @@
+# Xcode
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+Package.pins
+Package.resolved
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Xcode build intermediates
+**/Build/
+**/Intermediates.noindex/
+**/Index.noindex/
+**/Logs/
+
+# CocoaPods (if ever used)
+Pods/
+
+# Generated assets
+**/DerivedSources/GeneratedAssetSymbols.swift
+
+# Studiio scan bundles (large binary data - don't commit)
+*.studiio
+
+# Compiled CLI tools (keep .swift source, not binaries)
+code/tools/dollshouse
+code/tools/floorplan2d
+code/tools/hybrid-floorplan
+
+# Environment / secrets
+.env
+*.pem
+*.p12
+*.mobileprovision

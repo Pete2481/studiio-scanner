@@ -1,0 +1,610 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1307A09877052F6CC6E9279E /* ARSessionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2889D8458997ED806AD8DBC8 /* ARSessionHandler.swift */; };
+		13D01E294CF8D8B9DCB7EF45 /* ScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB8EF34E0D34B96A8BE8C31 /* ScanView.swift */; };
+		1A30AE921E23EDF911197DDA /* OutdoorDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1CB082BBEE286F36EEE7B1F /* OutdoorDetectorTests.swift */; };
+		23BCC628A2D024DAE2C29F6B /* StudiioTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E523EFBDBB96BA0316A7F5EF /* StudiioTheme.swift */; };
+		2A14A266DC56DD96818B4E17 /* PropertyProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B421A8C93AB40CC4F4DE7E8 /* PropertyProjectTests.swift */; };
+		301777F6EC565F7C41A8EEF0 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = AC0EBC81C72E7274B489F02A /* icon.png */; };
+		328FEEAC0677C1AADEDECA4C /* AIObjectDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6145E8CDBD2F332796268D /* AIObjectDetector.swift */; };
+		3B552ED0AD3A7EE882684344 /* ScanDebugOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26FB3F88A5C93181C921EEEF /* ScanDebugOverlay.swift */; };
+		4FABD9131C1982EA02648F6C /* ARScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770082CC04AA1EF895155E72 /* ARScanningView.swift */; };
+		58BA00C524CD43401484010C /* ProjectListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0B2DD9A84447FCBB271BB9 /* ProjectListView.swift */; };
+		61947B9F3018AAB4071F737D /* StudiioScannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315B337F09843EDB1EAD639 /* StudiioScannerApp.swift */; };
+		7383CF53C17266E13B673AE5 /* ScanSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA4EC45DEBE0669A103A2E9E /* ScanSessionManager.swift */; };
+		762E51BB543D5A5EF8EFD481 /* MeshObjectDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5DEF7307801CBAC9359301C /* MeshObjectDetector.swift */; };
+		76499AC0519DC6F6D38E4508 /* ObjectTaggingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749C3C5234D2071E7F46EF06 /* ObjectTaggingView.swift */; };
+		7CA9793B7A6C948B87BCE7FA /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 182F4438A31233949618BBD0 /* SyncManager.swift */; };
+		96D3386D983518555D4EA595 /* VoiceTagging.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC280B73034AD6E237202CDF /* VoiceTagging.swift */; };
+		9AFC415A9ACD40B11A654E8B /* ProjectStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD5913503B71B55DCB962B40 /* ProjectStoreTests.swift */; };
+		A169F645CFE9DBE61AD0FAFB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F97F011257B14E28D6763C44 /* Assets.xcassets */; };
+		A29697FBA66F42776070009D /* ProjectStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C6AA00D39DB658B31B523B /* ProjectStore.swift */; };
+		ABB807BAC3B83AFAD5D13507 /* OutdoorDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB73E03668FF2E7164E38FFC /* OutdoorDetector.swift */; };
+		ABE6A91477200596E5766A81 /* SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1A20299BD9F445F2FA5E92 /* SyncTests.swift */; };
+		B601391976AF4CDA9407C1CB /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B236A5211CF06B4A67FEC4 /* HomeView.swift */; };
+		BC227F9631B6ED437181DFDA /* TaggingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6332BA463C7CE288E28ABD49 /* TaggingTests.swift */; };
+		CAC89ACE06B587140A767AF3 /* OutdoorZoneTaggingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A671AE8AC144BD0C592BC32 /* OutdoorZoneTaggingView.swift */; };
+		D078A2E8864E02BA890D8D8C /* PostScanPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7951AD7099CFC6E245941CF4 /* PostScanPreviewView.swift */; };
+		DCE5962A9F050DFB1D5CE133 /* PropertyProject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AB4686B2E3397E8C8CBACA1 /* PropertyProject.swift */; };
+		DF2F4ED8B1FEF91A6242A996 /* MeshOverlayRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E342A6E250313C9F974EAAC /* MeshOverlayRenderer.swift */; };
+		ED3F4BAAD7770AEAAF7BCA27 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C8D2F83BF09B4D27DA7049C /* MainTabView.swift */; };
+		EF13336A2FD689F72BDA6956 /* ProjectDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C74A7B70640E78A9480171EB /* ProjectDetailView.swift */; };
+		F72CF23209A10DF8A0750B05 /* SyncSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59FC6676EF2E44F2B7A21B6 /* SyncSettingsView.swift */; };
+		FAB705D6AF8D597062C0DE80 /* ButtonStyles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11699795E95DD33B08E64CCD /* ButtonStyles.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BCEF30D116402B9782051D5A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C8C0510CABEB49236E40A38C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 14C8EE2ACDACCDB6296742B9;
+			remoteInfo = StudiioScanner;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		05B236A5211CF06B4A67FEC4 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		11699795E95DD33B08E64CCD /* ButtonStyles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStyles.swift; sourceTree = "<group>"; };
+		182F4438A31233949618BBD0 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
+		1AB4686B2E3397E8C8CBACA1 /* PropertyProject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyProject.swift; sourceTree = "<group>"; };
+		26FB3F88A5C93181C921EEEF /* ScanDebugOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanDebugOverlay.swift; sourceTree = "<group>"; };
+		2889D8458997ED806AD8DBC8 /* ARSessionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionHandler.swift; sourceTree = "<group>"; };
+		2D0B2DD9A84447FCBB271BB9 /* ProjectListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectListView.swift; sourceTree = "<group>"; };
+		4A671AE8AC144BD0C592BC32 /* OutdoorZoneTaggingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutdoorZoneTaggingView.swift; sourceTree = "<group>"; };
+		5B421A8C93AB40CC4F4DE7E8 /* PropertyProjectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyProjectTests.swift; sourceTree = "<group>"; };
+		6332BA463C7CE288E28ABD49 /* TaggingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaggingTests.swift; sourceTree = "<group>"; };
+		66FB986BA16AA3F7DDBAF377 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		749C3C5234D2071E7F46EF06 /* ObjectTaggingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectTaggingView.swift; sourceTree = "<group>"; };
+		770082CC04AA1EF895155E72 /* ARScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARScanningView.swift; sourceTree = "<group>"; };
+		7951AD7099CFC6E245941CF4 /* PostScanPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostScanPreviewView.swift; sourceTree = "<group>"; };
+		7E342A6E250313C9F974EAAC /* MeshOverlayRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshOverlayRenderer.swift; sourceTree = "<group>"; };
+		8D1A20299BD9F445F2FA5E92 /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
+		9C8D2F83BF09B4D27DA7049C /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		9F6145E8CDBD2F332796268D /* AIObjectDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIObjectDetector.swift; sourceTree = "<group>"; };
+		A315B337F09843EDB1EAD639 /* StudiioScannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudiioScannerApp.swift; sourceTree = "<group>"; };
+		A59FC6676EF2E44F2B7A21B6 /* SyncSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncSettingsView.swift; sourceTree = "<group>"; };
+		AC0EBC81C72E7274B489F02A /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		AC280B73034AD6E237202CDF /* VoiceTagging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTagging.swift; sourceTree = "<group>"; };
+		BAB8EF34E0D34B96A8BE8C31 /* ScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanView.swift; sourceTree = "<group>"; };
+		BD0752B344428E3DF9C90FE3 /* StudiioScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StudiioScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C74A7B70640E78A9480171EB /* ProjectDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectDetailView.swift; sourceTree = "<group>"; };
+		D7C6AA00D39DB658B31B523B /* ProjectStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectStore.swift; sourceTree = "<group>"; };
+		DB73E03668FF2E7164E38FFC /* OutdoorDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutdoorDetector.swift; sourceTree = "<group>"; };
+		DC4C1F82B457CCFCE37B5B07 /* StudiioScanner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StudiioScanner.entitlements; sourceTree = "<group>"; };
+		DD5913503B71B55DCB962B40 /* ProjectStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectStoreTests.swift; sourceTree = "<group>"; };
+		E1CB082BBEE286F36EEE7B1F /* OutdoorDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutdoorDetectorTests.swift; sourceTree = "<group>"; };
+		E523EFBDBB96BA0316A7F5EF /* StudiioTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudiioTheme.swift; sourceTree = "<group>"; };
+		E5DEF7307801CBAC9359301C /* MeshObjectDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshObjectDetector.swift; sourceTree = "<group>"; };
+		ECA352A469A31CDED499D424 /* StudiioScannerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StudiioScannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F97F011257B14E28D6763C44 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FA4EC45DEBE0669A103A2E9E /* ScanSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanSessionManager.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0BCD3AB966666A148D4BC932 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				11699795E95DD33B08E64CCD /* ButtonStyles.swift */,
+				E523EFBDBB96BA0316A7F5EF /* StudiioTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		0E71586415CC319D664309A7 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				05B236A5211CF06B4A67FEC4 /* HomeView.swift */,
+				9C8D2F83BF09B4D27DA7049C /* MainTabView.swift */,
+				C74A7B70640E78A9480171EB /* ProjectDetailView.swift */,
+				2D0B2DD9A84447FCBB271BB9 /* ProjectListView.swift */,
+				A315B337F09843EDB1EAD639 /* StudiioScannerApp.swift */,
+				A59FC6676EF2E44F2B7A21B6 /* SyncSettingsView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		268EDFBE77A8A93EA4D6FFE3 = {
+			isa = PBXGroup;
+			children = (
+				B69C446C6A7290F44FFD4FE5 /* StudiioScanner */,
+				73F439A2B1B181B1EEB813D9 /* StudiioScannerTests */,
+				C0A193ADD48E716DD06D3164 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3A4FE992A431DF3BC44D7748 /* Tagging */ = {
+			isa = PBXGroup;
+			children = (
+				9F6145E8CDBD2F332796268D /* AIObjectDetector.swift */,
+				749C3C5234D2071E7F46EF06 /* ObjectTaggingView.swift */,
+				AC280B73034AD6E237202CDF /* VoiceTagging.swift */,
+			);
+			path = Tagging;
+			sourceTree = "<group>";
+		};
+		3E92FB2D994E305A8432BF81 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1AB4686B2E3397E8C8CBACA1 /* PropertyProject.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		73F439A2B1B181B1EEB813D9 /* StudiioScannerTests */ = {
+			isa = PBXGroup;
+			children = (
+				E1CB082BBEE286F36EEE7B1F /* OutdoorDetectorTests.swift */,
+				DD5913503B71B55DCB962B40 /* ProjectStoreTests.swift */,
+				5B421A8C93AB40CC4F4DE7E8 /* PropertyProjectTests.swift */,
+				8D1A20299BD9F445F2FA5E92 /* SyncTests.swift */,
+				6332BA463C7CE288E28ABD49 /* TaggingTests.swift */,
+			);
+			path = StudiioScannerTests;
+			sourceTree = "<group>";
+		};
+		947AC647534051C32C60087D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F97F011257B14E28D6763C44 /* Assets.xcassets */,
+				D012C8BA3AB8B715D8842677 /* icon */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B69C446C6A7290F44FFD4FE5 /* StudiioScanner */ = {
+			isa = PBXGroup;
+			children = (
+				66FB986BA16AA3F7DDBAF377 /* Info.plist */,
+				DC4C1F82B457CCFCE37B5B07 /* StudiioScanner.entitlements */,
+				0E71586415CC319D664309A7 /* App */,
+				BD4AB0BBC35257076E5CEBB5 /* Capture */,
+				3E92FB2D994E305A8432BF81 /* Models */,
+				D565F4A9C7963E883789A5BC /* ProjectStore */,
+				947AC647534051C32C60087D /* Resources */,
+				F71F978E81279FCE17A62F9D /* Sync */,
+				3A4FE992A431DF3BC44D7748 /* Tagging */,
+				0BCD3AB966666A148D4BC932 /* Theme */,
+			);
+			path = StudiioScanner;
+			sourceTree = "<group>";
+		};
+		BD4AB0BBC35257076E5CEBB5 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				770082CC04AA1EF895155E72 /* ARScanningView.swift */,
+				2889D8458997ED806AD8DBC8 /* ARSessionHandler.swift */,
+				E5DEF7307801CBAC9359301C /* MeshObjectDetector.swift */,
+				7E342A6E250313C9F974EAAC /* MeshOverlayRenderer.swift */,
+				DB73E03668FF2E7164E38FFC /* OutdoorDetector.swift */,
+				4A671AE8AC144BD0C592BC32 /* OutdoorZoneTaggingView.swift */,
+				7951AD7099CFC6E245941CF4 /* PostScanPreviewView.swift */,
+				26FB3F88A5C93181C921EEEF /* ScanDebugOverlay.swift */,
+				FA4EC45DEBE0669A103A2E9E /* ScanSessionManager.swift */,
+				BAB8EF34E0D34B96A8BE8C31 /* ScanView.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
+		C0A193ADD48E716DD06D3164 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BD0752B344428E3DF9C90FE3 /* StudiioScanner.app */,
+				ECA352A469A31CDED499D424 /* StudiioScannerTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D012C8BA3AB8B715D8842677 /* icon */ = {
+			isa = PBXGroup;
+			children = (
+				AC0EBC81C72E7274B489F02A /* icon.png */,
+			);
+			path = icon;
+			sourceTree = "<group>";
+		};
+		D565F4A9C7963E883789A5BC /* ProjectStore */ = {
+			isa = PBXGroup;
+			children = (
+				D7C6AA00D39DB658B31B523B /* ProjectStore.swift */,
+			);
+			path = ProjectStore;
+			sourceTree = "<group>";
+		};
+		F71F978E81279FCE17A62F9D /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				182F4438A31233949618BBD0 /* SyncManager.swift */,
+			);
+			path = Sync;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		11993CBFC45EC1C7AABA1EB5 /* StudiioScannerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A61D3D7DC052CDFFF523662 /* Build configuration list for PBXNativeTarget "StudiioScannerTests" */;
+			buildPhases = (
+				E271E7CC4EDA3BC86F579AC0 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E91F7C3CB4A53CB7DF062EDF /* PBXTargetDependency */,
+			);
+			name = StudiioScannerTests;
+			packageProductDependencies = (
+			);
+			productName = StudiioScannerTests;
+			productReference = ECA352A469A31CDED499D424 /* StudiioScannerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		14C8EE2ACDACCDB6296742B9 /* StudiioScanner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6CF160309811FC8851D12B73 /* Build configuration list for PBXNativeTarget "StudiioScanner" */;
+			buildPhases = (
+				14FBD0FC349A2432DC3907A8 /* Sources */,
+				AE25D9F93677BDC63E34C530 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StudiioScanner;
+			packageProductDependencies = (
+			);
+			productName = StudiioScanner;
+			productReference = BD0752B344428E3DF9C90FE3 /* StudiioScanner.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C8C0510CABEB49236E40A38C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					11993CBFC45EC1C7AABA1EB5 = {
+						DevelopmentTeam = 97RBCCUY36;
+						ProvisioningStyle = Automatic;
+					};
+					14C8EE2ACDACCDB6296742B9 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = CA215E3E8684621866ADC1CF /* Build configuration list for PBXProject "StudiioScanner" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 268EDFBE77A8A93EA4D6FFE3;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				14C8EE2ACDACCDB6296742B9 /* StudiioScanner */,
+				11993CBFC45EC1C7AABA1EB5 /* StudiioScannerTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AE25D9F93677BDC63E34C530 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A169F645CFE9DBE61AD0FAFB /* Assets.xcassets in Resources */,
+				301777F6EC565F7C41A8EEF0 /* icon.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		14FBD0FC349A2432DC3907A8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				328FEEAC0677C1AADEDECA4C /* AIObjectDetector.swift in Sources */,
+				4FABD9131C1982EA02648F6C /* ARScanningView.swift in Sources */,
+				1307A09877052F6CC6E9279E /* ARSessionHandler.swift in Sources */,
+				FAB705D6AF8D597062C0DE80 /* ButtonStyles.swift in Sources */,
+				B601391976AF4CDA9407C1CB /* HomeView.swift in Sources */,
+				ED3F4BAAD7770AEAAF7BCA27 /* MainTabView.swift in Sources */,
+				762E51BB543D5A5EF8EFD481 /* MeshObjectDetector.swift in Sources */,
+				DF2F4ED8B1FEF91A6242A996 /* MeshOverlayRenderer.swift in Sources */,
+				76499AC0519DC6F6D38E4508 /* ObjectTaggingView.swift in Sources */,
+				ABB807BAC3B83AFAD5D13507 /* OutdoorDetector.swift in Sources */,
+				CAC89ACE06B587140A767AF3 /* OutdoorZoneTaggingView.swift in Sources */,
+				D078A2E8864E02BA890D8D8C /* PostScanPreviewView.swift in Sources */,
+				EF13336A2FD689F72BDA6956 /* ProjectDetailView.swift in Sources */,
+				58BA00C524CD43401484010C /* ProjectListView.swift in Sources */,
+				A29697FBA66F42776070009D /* ProjectStore.swift in Sources */,
+				DCE5962A9F050DFB1D5CE133 /* PropertyProject.swift in Sources */,
+				3B552ED0AD3A7EE882684344 /* ScanDebugOverlay.swift in Sources */,
+				7383CF53C17266E13B673AE5 /* ScanSessionManager.swift in Sources */,
+				13D01E294CF8D8B9DCB7EF45 /* ScanView.swift in Sources */,
+				61947B9F3018AAB4071F737D /* StudiioScannerApp.swift in Sources */,
+				23BCC628A2D024DAE2C29F6B /* StudiioTheme.swift in Sources */,
+				7CA9793B7A6C948B87BCE7FA /* SyncManager.swift in Sources */,
+				F72CF23209A10DF8A0750B05 /* SyncSettingsView.swift in Sources */,
+				96D3386D983518555D4EA595 /* VoiceTagging.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E271E7CC4EDA3BC86F579AC0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A30AE921E23EDF911197DDA /* OutdoorDetectorTests.swift in Sources */,
+				9AFC415A9ACD40B11A654E8B /* ProjectStoreTests.swift in Sources */,
+				2A14A266DC56DD96818B4E17 /* PropertyProjectTests.swift in Sources */,
+				ABE6A91477200596E5766A81 /* SyncTests.swift in Sources */,
+				BC227F9631B6ED437181DFDA /* TaggingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E91F7C3CB4A53CB7DF062EDF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 14C8EE2ACDACCDB6296742B9 /* StudiioScanner */;
+			targetProxy = BCEF30D116402B9782051D5A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0CAC904F6E505BE84C3D4D6C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = StudiioScanner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		28FCAA542EDE59C1A1F24FDB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 97RBCCUY36;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.scanner.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StudiioScanner.app/StudiioScanner";
+			};
+			name = Debug;
+		};
+		454AC88944CF5E1E489F25F0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StudiioScanner/StudiioScanner.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LZ4KYNSJ89;
+				INFOPLIST_FILE = StudiioScanner/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.scanner;
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		712B02E0D56D61CC3C253926 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 97RBCCUY36;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.scanner.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StudiioScanner.app/StudiioScanner";
+			};
+			name = Release;
+		};
+		86DF480CEE424460D06A1654 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = StudiioScanner/StudiioScanner.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LZ4KYNSJ89;
+				INFOPLIST_FILE = StudiioScanner/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.studiio.scanner;
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1AB00CE03E2B2A24F426AA6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = StudiioScanner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4A61D3D7DC052CDFFF523662 /* Build configuration list for PBXNativeTarget "StudiioScannerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				28FCAA542EDE59C1A1F24FDB /* Debug */,
+				712B02E0D56D61CC3C253926 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6CF160309811FC8851D12B73 /* Build configuration list for PBXNativeTarget "StudiioScanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86DF480CEE424460D06A1654 /* Debug */,
+				454AC88944CF5E1E489F25F0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		CA215E3E8684621866ADC1CF /* Build configuration list for PBXProject "StudiioScanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0CAC904F6E505BE84C3D4D6C /* Debug */,
+				A1AB00CE03E2B2A24F426AA6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C8C0510CABEB49236E40A38C /* Project object */;
+}

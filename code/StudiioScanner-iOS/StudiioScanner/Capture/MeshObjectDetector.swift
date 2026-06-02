@@ -281,7 +281,7 @@ struct MeshObjectDetector {
     // MARK: - Room Segmentation by Ceiling Planes
 
     /// Each ceiling plane = one room. Walls and openings are assigned to the
-    /// room whose ceiling footprint they fall within.
+    /// NEAREST ceiling plane (by distance from center), not strict containment.
     private static func segmentRoomsByCeiling(
         planeData: [ExtractedPlaneData],
         walls: [WallSegment],
@@ -289,58 +289,86 @@ struct MeshObjectDetector {
         floorLevel: Float,
         ceilingLevel: Float
     ) -> [RoomSegment] {
-        // Find ceiling planes (horizontal, classified as ceiling)
-        let ceilingPlanes = planeData.filter { $0.classification == .ceiling && $0.alignment == .horizontal }
+        // Find ceiling planes (horizontal, classified as ceiling, > 4m²)
+        let ceilingPlanes = planeData.filter {
+            $0.classification == .ceiling && $0.alignment == .horizontal && $0.extentX * $0.extentZ > 4.0
+        }
         guard !ceilingPlanes.isEmpty else { return [] }
 
+        // Compute world-space center for each ceiling plane
+        struct CeilingRoom {
+            let plane: ExtractedPlaneData
+            let centerWorld: SIMD2<Float>  // XZ center in world space
+            let footprint: [SIMD2<Float>]  // 4 corners in world XZ
+            var walls: [WallSegment] = []
+            var openings: [DetectedOpening] = []
+        }
+
+        var ceilingRooms: [CeilingRoom] = ceilingPlanes.map { plane in
+            let t = plane.transform
+            let worldCenter = t * SIMD4<Float>(plane.centerX, 0, plane.centerZ, 1)
+            let fp = ceilingFootprintXZ(plane)
+            return CeilingRoom(
+                plane: plane,
+                centerWorld: SIMD2<Float>(worldCenter.x, worldCenter.z),
+                footprint: fp
+            )
+        }
+
+        // Sort by area descending (largest room first for logging clarity)
+        ceilingRooms.sort { $0.plane.extentX * $0.plane.extentZ > $1.plane.extentX * $1.plane.extentZ }
+
+        // Assign each wall to its nearest ceiling plane
+        for wall in walls {
+            let midX = Float((wall.startX + wall.endX) / 2)
+            let midZ = Float((wall.startZ + wall.endZ) / 2)
+            let wallMid = SIMD2<Float>(midX, midZ)
+
+            var bestIdx = 0
+            var bestDist: Float = .greatestFiniteMagnitude
+            for (i, room) in ceilingRooms.enumerated() {
+                let dist = simd_distance(wallMid, room.centerWorld)
+                if dist < bestDist {
+                    bestDist = dist
+                    bestIdx = i
+                }
+            }
+            ceilingRooms[bestIdx].walls.append(wall)
+        }
+
+        // Assign each opening to its nearest ceiling plane
+        for opening in openings {
+            let pos = SIMD2<Float>(Float(opening.positionX), Float(opening.positionZ))
+
+            var bestIdx = 0
+            var bestDist: Float = .greatestFiniteMagnitude
+            for (i, room) in ceilingRooms.enumerated() {
+                let dist = simd_distance(pos, room.centerWorld)
+                if dist < bestDist {
+                    bestDist = dist
+                    bestIdx = i
+                }
+            }
+            ceilingRooms[bestIdx].openings.append(opening)
+        }
+
+        // Build room segments
         var rooms: [RoomSegment] = []
-        var roomIndex = 0
-
-        for plane in ceilingPlanes {
-            // Skip tiny ceiling fragments (< 4 m²)
-            let area = Double(plane.extentX * plane.extentZ)
-            guard area > 4.0 else { continue }
-
-            // Compute the 4 corners of the ceiling plane in world XZ space
-            let footprint = ceilingFootprintXZ(plane)
-            guard footprint.count == 4 else { continue }
-
-            // Convert footprint to PointXZ for storage
-            let polygon = footprint.map { PointXZ(x: Double($0.x), z: Double($0.y)) }
-
-            // Find walls whose midpoint is inside this ceiling footprint
-            var roomWalls: [WallSegment] = []
-            for wall in walls {
-                let midX = Float((wall.startX + wall.endX) / 2)
-                let midZ = Float((wall.startZ + wall.endZ) / 2)
-                if pointInConvexPolygon(SIMD2<Float>(midX, midZ), polygon: footprint, tolerance: 0.3) {
-                    roomWalls.append(wall)
-                }
-            }
-
-            // Find openings inside this ceiling footprint
-            var roomOpenings: [DetectedOpening] = []
-            for opening in openings {
-                let px = Float(opening.positionX)
-                let pz = Float(opening.positionZ)
-                if pointInConvexPolygon(SIMD2<Float>(px, pz), polygon: footprint, tolerance: 0.5) {
-                    roomOpenings.append(opening)
-                }
-            }
-
-            roomIndex += 1
-            let name = ceilingPlanes.count == 1 ? "Scanned Area" : "Room \(roomIndex)"
+        for (i, cr) in ceilingRooms.enumerated() {
+            let area = Double(cr.plane.extentX * cr.plane.extentZ)
+            let polygon = cr.footprint.map { PointXZ(x: Double($0.x), z: Double($0.y)) }
+            let name = ceilingRooms.count == 1 ? "Scanned Area" : "Room \(i + 1)"
 
             rooms.append(RoomSegment(
                 name: name,
                 polygon: polygon,
-                walls: roomWalls,
-                openings: roomOpenings,
+                walls: cr.walls,
+                openings: cr.openings,
                 area: area,
-                width: Double(plane.extentX),
-                depth: Double(plane.extentZ)
+                width: Double(cr.plane.extentX),
+                depth: Double(cr.plane.extentZ)
             ))
-            print("[ObjectDetector] Room '\(name)': \(String(format: "%.1f", plane.extentX))m × \(String(format: "%.1f", plane.extentZ))m = \(String(format: "%.1f", area))m², \(roomWalls.count) walls, \(roomOpenings.count) openings")
+            print("[ObjectDetector] Room '\(name)': \(String(format: "%.1f", cr.plane.extentX))m × \(String(format: "%.1f", cr.plane.extentZ))m = \(String(format: "%.1f", area))m², \(cr.walls.count) walls, \(cr.openings.count) openings, center=(\(String(format: "%.1f", cr.centerWorld.x)), \(String(format: "%.1f", cr.centerWorld.y)))")
         }
 
         return rooms

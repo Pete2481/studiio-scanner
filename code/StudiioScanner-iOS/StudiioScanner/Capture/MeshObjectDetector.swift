@@ -171,16 +171,18 @@ struct MeshObjectDetector {
             }
         }
 
-        // 5d: Final merge and corner fitting
-        let mergedWalls = mergeCollinearWalls(combinedWalls)
+        // 5d: Deduplicate, merge, corner fit, and close loops
+        let dedupedWalls = deduplicateWalls(combinedWalls)
+        let mergedWalls = mergeCollinearWalls(dedupedWalls)
         let cornerFittedWalls = fitCorners(mergedWalls)
-        print("[ObjectDetector] Final walls after merge+corners: \(cornerFittedWalls.count)")
+        let closedWalls = closeWallLoops(cornerFittedWalls)
+        print("[ObjectDetector] Final walls: \(closedWalls.count) (dedup \(dedupedWalls.count), merged \(mergedWalls.count), corners \(cornerFittedWalls.count), closed \(closedWalls.count))")
 
         // Step 6: Opening detection — mesh gaps + plane anchor door/window classifications
-        var rawOpenings = detectRawOpenings(wallLines: cornerFittedWalls, vertices: rotatedPlain, floorY: floorY, ceilingY: ceilingY)
+        var rawOpenings = detectRawOpenings(wallLines: closedWalls, vertices: rotatedPlain, floorY: floorY, ceilingY: ceilingY)
 
         // Enhance with plane anchor classifications (door/window planes override width-based guessing)
-        let planeOpenings = openingsFromPlaneAnchors(planeData, rotAngle: rotAngle, walls: cornerFittedWalls, floorY: floorY, ceilingY: ceilingY)
+        let planeOpenings = openingsFromPlaneAnchors(planeData, rotAngle: rotAngle, walls: closedWalls, floorY: floorY, ceilingY: ceilingY)
         for po in planeOpenings {
             // If a mesh opening is near this plane opening, update its classification
             var matched = false
@@ -201,16 +203,16 @@ struct MeshObjectDetector {
         print("[ObjectDetector] Openings: \(rawOpenings.count) (\(planeOpenings.count) from plane anchors)")
 
         // Step 6: Room dimensions from wall lines
-        let dims = measureRoomFromRawWalls(wallLines: cornerFittedWalls)
+        let dims = measureRoomFromRawWalls(wallLines: closedWalls)
 
         // Phase C: Extract floor polygon from wall endpoints
-        let floorPoly = extractFloorPolygon(from: cornerFittedWalls)
+        let floorPoly = extractFloorPolygon(from: closedWalls)
 
         // Convert raw walls to model WallSegments (un-rotated to world space)
         let cosA = cos(-rotAngle)
         let sinA = sin(-rotAngle)
 
-        let modelWalls: [WallSegment] = cornerFittedWalls.map { w in
+        let modelWalls: [WallSegment] = closedWalls.map { w in
             let sx = Double(w.startX * cosA - w.startZ * sinA)
             let sz = Double(w.startX * sinA + w.startZ * cosA)
             let ex = Double(w.endX * cosA - w.endZ * sinA)
@@ -467,6 +469,77 @@ struct MeshObjectDetector {
         }
     }
 
+    // MARK: - Phase C: Deduplicate Walls
+
+    /// Remove duplicate walls from overlapping scan passes. Two walls are duplicates
+    /// if they have the same orientation, similar perpendicular position, and
+    /// overlapping extent along their primary axis.
+    private static func deduplicateWalls(_ walls: [RawWall]) -> [RawWall] {
+        guard walls.count >= 2 else { return walls }
+
+        let positionThreshold: Float = 0.25  // max perpendicular distance to consider same wall
+        let overlapThreshold: Float = 0.3    // min overlap fraction to consider duplicate
+
+        var kept = [Bool](repeating: true, count: walls.count)
+
+        for i in 0..<walls.count {
+            guard kept[i] else { continue }
+            for j in (i + 1)..<walls.count {
+                guard kept[j] else { continue }
+
+                let wi = walls[i], wj = walls[j]
+
+                // Must be same orientation (both horizontal or both vertical)
+                let sameOrientation = abs(wi.angle - wj.angle) < 0.1 ||
+                    abs(abs(wi.angle - wj.angle) - .pi) < 0.1
+                guard sameOrientation else { continue }
+
+                let isHorizontal = abs(wi.angle) < 0.1 || abs(wi.angle - .pi) < 0.1
+
+                if isHorizontal {
+                    // Horizontal walls: compare Z positions, overlap on X axis
+                    let zDist = abs(wi.startZ - wj.startZ)
+                    guard zDist < positionThreshold else { continue }
+
+                    let iMinX = min(wi.startX, wi.endX), iMaxX = max(wi.startX, wi.endX)
+                    let jMinX = min(wj.startX, wj.endX), jMaxX = max(wj.startX, wj.endX)
+                    let overlap = max(0, min(iMaxX, jMaxX) - max(iMinX, jMinX))
+                    let shorter = min(iMaxX - iMinX, jMaxX - jMinX)
+                    guard shorter > 0 && overlap / shorter > overlapThreshold else { continue }
+
+                    // Keep the longer wall, discard the shorter
+                    if wi.length >= wj.length {
+                        kept[j] = false
+                    } else {
+                        kept[i] = false
+                        break
+                    }
+                } else {
+                    // Vertical walls: compare X positions, overlap on Z axis
+                    let xDist = abs(wi.startX - wj.startX)
+                    guard xDist < positionThreshold else { continue }
+
+                    let iMinZ = min(wi.startZ, wi.endZ), iMaxZ = max(wi.startZ, wi.endZ)
+                    let jMinZ = min(wj.startZ, wj.endZ), jMaxZ = max(wj.startZ, wj.endZ)
+                    let overlap = max(0, min(iMaxZ, jMaxZ) - max(iMinZ, jMinZ))
+                    let shorter = min(iMaxZ - iMinZ, jMaxZ - jMinZ)
+                    guard shorter > 0 && overlap / shorter > overlapThreshold else { continue }
+
+                    if wi.length >= wj.length {
+                        kept[j] = false
+                    } else {
+                        kept[i] = false
+                        break
+                    }
+                }
+            }
+        }
+
+        let result = walls.enumerated().compactMap { kept[$0.offset] ? $0.element : nil }
+        print("[ObjectDetector] Dedup: \(walls.count) → \(result.count) walls")
+        return result
+    }
+
     // MARK: - Phase C: Merge Collinear Walls
 
     /// Merge wall segments that lie on the same line (same orientation, close
@@ -664,9 +737,170 @@ struct MeshObjectDetector {
         }
 
         // Remove walls that became too short after merging/trimming
-        result = result.filter { $0.length > 0.3 }
+        // (lowered from 0.3 to catch short L-notch walls)
+        result = result.filter { $0.length > 0.15 }
 
         return result
+    }
+
+    // MARK: - Phase C: Close Wall Loops
+
+    /// Find unconnected wall endpoints and add inferred wall segments to close
+    /// the room polygon. Handles L-shapes by inserting orthogonal connector walls
+    /// between nearby unmatched endpoints.
+    private static func closeWallLoops(_ walls: [RawWall]) -> [RawWall] {
+        guard walls.count >= 2 else { return walls }
+
+        let connectionThreshold: Float = 1.5  // max gap to bridge with a new wall
+        let connectedThreshold: Float = 0.15  // endpoints closer than this are already connected
+
+        // Collect all endpoints
+        struct Endpoint {
+            let wallIndex: Int
+            let isStart: Bool
+            var x: Float
+            var z: Float
+        }
+
+        var endpoints: [Endpoint] = []
+        for (i, w) in walls.enumerated() {
+            endpoints.append(Endpoint(wallIndex: i, isStart: true, x: w.startX, z: w.startZ))
+            endpoints.append(Endpoint(wallIndex: i, isStart: false, x: w.endX, z: w.endZ))
+        }
+
+        // Find which endpoints are "free" (not connected to another wall's endpoint)
+        var isFree = [Bool](repeating: true, count: endpoints.count)
+        for i in 0..<endpoints.count {
+            for j in (i + 1)..<endpoints.count {
+                // Don't match endpoints from the same wall
+                guard endpoints[i].wallIndex != endpoints[j].wallIndex else { continue }
+                let dx = endpoints[i].x - endpoints[j].x
+                let dz = endpoints[i].z - endpoints[j].z
+                let dist = sqrt(dx * dx + dz * dz)
+                if dist < connectedThreshold {
+                    isFree[i] = false
+                    isFree[j] = false
+                }
+            }
+        }
+
+        let freeEndpoints = endpoints.enumerated().compactMap { isFree[$0.offset] ? $0.element : nil }
+        guard freeEndpoints.count >= 2 else { return walls }
+
+        // Try to connect free endpoints with new wall segments
+        var newWalls: [RawWall] = []
+        var used = [Bool](repeating: false, count: freeEndpoints.count)
+
+        for i in 0..<freeEndpoints.count {
+            guard !used[i] else { continue }
+            var bestJ = -1
+            var bestDist: Float = connectionThreshold
+
+            for j in (i + 1)..<freeEndpoints.count {
+                guard !used[j] else { continue }
+                // Don't connect two endpoints from the same wall
+                guard freeEndpoints[i].wallIndex != freeEndpoints[j].wallIndex else { continue }
+
+                let dx = freeEndpoints[i].x - freeEndpoints[j].x
+                let dz = freeEndpoints[i].z - freeEndpoints[j].z
+                let dist = sqrt(dx * dx + dz * dz)
+                if dist < bestDist {
+                    bestDist = dist
+                    bestJ = j
+                }
+            }
+
+            guard bestJ >= 0 else { continue }
+            used[i] = true
+            used[bestJ] = true
+
+            let ep1 = freeEndpoints[i]
+            let ep2 = freeEndpoints[bestJ]
+
+            let dx = abs(ep2.x - ep1.x)
+            let dz = abs(ep2.z - ep1.z)
+
+            // If the gap is mostly along one axis, add a single straight wall
+            if dx < 0.15 || dz < 0.15 {
+                // Nearly aligned — single wall connection
+                let len = sqrt((ep2.x - ep1.x) * (ep2.x - ep1.x) + (ep2.z - ep1.z) * (ep2.z - ep1.z))
+                guard len > 0.1 else { continue }
+                let angle: Float = dx < 0.15 ? 0 : .pi / 2
+                var wall = RawWall(startX: ep1.x, startZ: ep1.z, endX: ep2.x, endZ: ep2.z,
+                                   thickness: 0.1, length: len, angle: angle)
+                // Snap to axis
+                if dx < 0.15 {
+                    // Vertical wall — average the X
+                    let avgX = (ep1.x + ep2.x) / 2
+                    wall.startX = avgX
+                    wall.endX = avgX
+                    wall.angle = 0
+                } else {
+                    // Horizontal wall — average the Z
+                    let avgZ = (ep1.z + ep2.z) / 2
+                    wall.startZ = avgZ
+                    wall.endZ = avgZ
+                    wall.angle = .pi / 2
+                }
+                let wdx = wall.endX - wall.startX
+                let wdz = wall.endZ - wall.startZ
+                wall.length = sqrt(wdx * wdx + wdz * wdz)
+                newWalls.append(wall)
+            } else {
+                // L-shape connection: add two orthogonal walls via a corner point
+                // Corner is at (ep1.x, ep2.z) or (ep2.x, ep1.z) — pick the one
+                // that better aligns with existing wall orientations
+                let corner1 = (x: ep1.x, z: ep2.z)
+                let corner2 = (x: ep2.x, z: ep1.z)
+
+                // Score each corner by checking which parent wall's axis it continues
+                let wall1 = walls[ep1.wallIndex]
+                let wall2 = walls[ep2.wallIndex]
+                let ep1Horizontal = abs(wall1.angle - .pi / 2) < 0.1
+                let ep2Horizontal = abs(wall2.angle - .pi / 2) < 0.1
+
+                // corner1: vertical from ep1 (ep1.x stays), horizontal to ep2
+                // corner2: horizontal from ep1 (ep1.z stays), vertical to ep2
+                let useCorner1: Bool
+                if ep1Horizontal {
+                    // ep1 is on a horizontal wall — extending vertically from it makes an L
+                    useCorner1 = true
+                } else if ep2Horizontal {
+                    useCorner1 = false
+                } else {
+                    // Both vertical — default to corner1
+                    useCorner1 = true
+                }
+
+                let corner = useCorner1 ? corner1 : corner2
+
+                // Leg 1: ep1 to corner
+                let len1 = sqrt((corner.x - ep1.x) * (corner.x - ep1.x) +
+                                (corner.z - ep1.z) * (corner.z - ep1.z))
+                if len1 > 0.1 {
+                    let angle1: Float = abs(corner.x - ep1.x) < 0.05 ? 0 : .pi / 2
+                    newWalls.append(RawWall(startX: ep1.x, startZ: ep1.z,
+                                           endX: corner.x, endZ: corner.z,
+                                           thickness: 0.1, length: len1, angle: angle1))
+                }
+
+                // Leg 2: corner to ep2
+                let len2 = sqrt((ep2.x - corner.x) * (ep2.x - corner.x) +
+                                (ep2.z - corner.z) * (ep2.z - corner.z))
+                if len2 > 0.1 {
+                    let angle2: Float = abs(ep2.x - corner.x) < 0.05 ? 0 : .pi / 2
+                    newWalls.append(RawWall(startX: corner.x, startZ: corner.z,
+                                           endX: ep2.x, endZ: ep2.z,
+                                           thickness: 0.1, length: len2, angle: angle2))
+                }
+            }
+        }
+
+        if !newWalls.isEmpty {
+            print("[ObjectDetector] CloseLoops: added \(newWalls.count) inferred wall(s) to close gaps")
+        }
+
+        return walls + newWalls
     }
 
     // MARK: - Phase C: Floor Polygon Extraction
@@ -1313,7 +1547,7 @@ struct MeshObjectDetector {
 
                     let wallLen = maxT - minT
                     let wallAngle = atan2(dz, dx)
-                    if wallLen > 0.3 {
+                    if wallLen > 0.15 {
                         bestInliers = inliers
                         bestOutliers = outliers
                         bestWall = RawWall(

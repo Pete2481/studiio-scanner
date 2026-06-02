@@ -121,43 +121,73 @@ struct MeshObjectDetector {
             )
         }
 
-        // Step 4: Detect objects by category
-        var objects: [TaggedObject] = []
+        // Step 4: Object detection disabled — focus on walls/openings accuracy first
+        let objects: [TaggedObject] = []
 
-        let horizontalSurfaces = detectHorizontalSurfaces(rotatedPlain, floorY: floorY)
-        objects.append(contentsOf: horizontalSurfaces)
+        // Step 5: Wall detection — plane anchors are PRIMARY, RANSAC fills gaps
 
-        let fixtures = detectFixtures(rotatedPlain, floorY: floorY)
-        objects.append(contentsOf: fixtures)
-
-        let ceilingFixtures = detectCeilingFixtures(rotatedPlain, floorY: floorY, ceilingY: ceilingY)
-        objects.append(contentsOf: ceilingFixtures)
-
-        let wallFeatures = detectWallFeatures(rotatedPlain, floorY: floorY, ceilingY: ceilingY)
-        objects.append(contentsOf: wallFeatures)
-
-        // Step 5: Wall lines and openings (uses classified vertices to filter out non-wall surfaces)
-        let wallPoints = extractWallPoints(rotatedClassified, floorY: floorY)
-        var rawWalls = fitRawWalls(from: wallPoints)
-
-        // Fix 3: Fuse ARPlaneAnchor wall data — these are Apple's highest-confidence wall detections
+        // 5a: Walls from ARPlaneAnchors (Apple's highest confidence detections)
         let planeWalls = wallsFromPlaneAnchors(planeData, rotAngle: rotAngle)
-        if !planeWalls.isEmpty {
-            rawWalls = fusePlaneWalls(planeWalls, with: rawWalls)
-            print("[ObjectDetector] Fused \(planeWalls.count) plane-anchor walls → \(rawWalls.count) total walls")
+        let snappedPlaneWalls = snapWallsToOrthogonal(planeWalls)
+        let mergedPlaneWalls = mergeCollinearWalls(snappedPlaneWalls)
+        print("[ObjectDetector] Plane-anchor walls: \(mergedPlaneWalls.count)")
+
+        // 5b: RANSAC walls from mesh points (supplemental — fills gaps plane anchors missed)
+        let wallPoints = extractWallPoints(rotatedClassified, floorY: floorY)
+        let ransacWalls = fitRawWalls(from: wallPoints)
+        let snappedRansac = snapWallsToOrthogonal(ransacWalls)
+        print("[ObjectDetector] RANSAC walls: \(snappedRansac.count)")
+
+        // 5c: Combine — add RANSAC walls only where no plane wall exists
+        var combinedWalls = mergedPlaneWalls
+        for rw in snappedRansac {
+            let rwMidX = (rw.startX + rw.endX) / 2
+            let rwMidZ = (rw.startZ + rw.endZ) / 2
+            let hasOverlap = combinedWalls.contains { pw in
+                let angleDiff = abs(rw.angle - pw.angle)
+                let isParallel = angleDiff < 0.35 || abs(angleDiff - .pi) < 0.35
+                guard isParallel else { return false }
+                // Perpendicular distance check
+                if abs(pw.angle) < 0.01 || abs(pw.angle - .pi) < 0.01 {
+                    return abs(rwMidZ - (pw.startZ + pw.endZ) / 2) < 0.4
+                } else if abs(pw.angle - .pi / 2) < 0.01 {
+                    return abs(rwMidX - (pw.startX + pw.endX) / 2) < 0.4
+                }
+                return false
+            }
+            if !hasOverlap && rw.length > 0.5 {
+                combinedWalls.append(rw)
+            }
         }
 
-        // Phase C: Orthogonal wall snapping — snap near-axis walls to exact 0°/90°
-        let snappedWalls = snapWallsToOrthogonal(rawWalls)
-
-        // Phase C: Merge collinear walls — combine segments on the same line
-        let mergedWalls = mergeCollinearWalls(snappedWalls)
-
-        // Phase C: Corner fitting — extend/trim walls to form clean right-angle intersections
+        // 5d: Final merge and corner fitting
+        let mergedWalls = mergeCollinearWalls(combinedWalls)
         let cornerFittedWalls = fitCorners(mergedWalls)
+        print("[ObjectDetector] Final walls after merge+corners: \(cornerFittedWalls.count)")
 
-        // Detect openings on the cleaned-up walls (uses plain vertices for density counting)
-        let rawOpenings = detectRawOpenings(wallLines: cornerFittedWalls, vertices: rotatedPlain, floorY: floorY, ceilingY: ceilingY)
+        // Step 6: Opening detection — mesh gaps + plane anchor door/window classifications
+        var rawOpenings = detectRawOpenings(wallLines: cornerFittedWalls, vertices: rotatedPlain, floorY: floorY, ceilingY: ceilingY)
+
+        // Enhance with plane anchor classifications (door/window planes override width-based guessing)
+        let planeOpenings = openingsFromPlaneAnchors(planeData, rotAngle: rotAngle, walls: cornerFittedWalls, floorY: floorY, ceilingY: ceilingY)
+        for po in planeOpenings {
+            // If a mesh opening is near this plane opening, update its classification
+            var matched = false
+            for i in 0..<rawOpenings.count {
+                let dist = sqrt(pow(rawOpenings[i].positionX - po.positionX, 2) + pow(rawOpenings[i].positionZ - po.positionZ, 2))
+                if dist < 0.8 {
+                    rawOpenings[i].kind = po.kind
+                    rawOpenings[i].sillHeight = po.sillHeight
+                    if po.width > 0.3 { rawOpenings[i].width = max(rawOpenings[i].width, po.width) }
+                    matched = true
+                    break
+                }
+            }
+            if !matched {
+                rawOpenings.append(po)
+            }
+        }
+        print("[ObjectDetector] Openings: \(rawOpenings.count) (\(planeOpenings.count) from plane anchors)")
 
         // Step 6: Room dimensions from wall lines
         let dims = measureRoomFromRawWalls(wallLines: cornerFittedWalls)
@@ -624,6 +654,90 @@ struct MeshObjectDetector {
         }
 
         return result
+    }
+
+    // MARK: - Openings from Plane Anchors
+
+    /// Convert ARPlaneAnchors classified as door/window into RawOpenings placed on the nearest wall
+    private static func openingsFromPlaneAnchors(_ planes: [ExtractedPlaneData], rotAngle: Float, walls: [RawWall], floorY: Float, ceilingY: Float) -> [RawOpening] {
+        let cosA = cos(rotAngle)
+        let sinA = sin(rotAngle)
+        var openings: [RawOpening] = []
+
+        for plane in planes {
+            let isDoor = plane.classification == .door
+            let isWindow = plane.classification == .window
+            guard isDoor || isWindow else { continue }
+            guard plane.alignment == .vertical else { continue }
+
+            // Plane center in world space
+            let t = plane.transform
+            let worldX = t.columns.3.x + plane.centerX * t.columns.0.x + plane.centerZ * t.columns.2.x
+            let worldZ = t.columns.3.z + plane.centerX * t.columns.0.z + plane.centerZ * t.columns.2.z
+            let worldY = t.columns.3.y + plane.centerX * t.columns.0.y + plane.centerZ * t.columns.2.y
+
+            // Rotate into aligned space
+            let rx = worldX * cosA - worldZ * sinA
+            let rz = worldX * sinA + worldZ * cosA
+
+            // Width is the horizontal extent of the plane
+            let width = plane.extentX
+            guard width > 0.2 else { continue }
+
+            // Height is the vertical extent
+            let height = plane.extentZ
+
+            // Find nearest wall
+            var bestWallIdx = -1
+            var bestDist: Float = .greatestFiniteMagnitude
+            for (i, wall) in walls.enumerated() {
+                let dx = wall.endX - wall.startX
+                let dz = wall.endZ - wall.startZ
+                let len = wall.length
+                guard len > 0 else { continue }
+                let nx = -dz / len, nz = dx / len
+                let perpDist = abs((rx - wall.startX) * nx + (rz - wall.startZ) * nz)
+                // Also check that the opening is along the wall's span
+                let along = (rx - wall.startX) * (dx / len) + (rz - wall.startZ) * (dz / len)
+                let onSpan = along >= -0.3 && along <= len + 0.3
+                if perpDist < bestDist && perpDist < 0.5 && onSpan {
+                    bestDist = perpDist
+                    bestWallIdx = i
+                }
+            }
+
+            let kind: OpeningKind
+            let sillHeight: Float
+            if isWindow {
+                kind = .window
+                // Estimate sill height from plane's vertical position
+                let bottomY = worldY - height / 2
+                sillHeight = max(0, bottomY - floorY)
+            } else {
+                // Door classification
+                if width >= 1.5 {
+                    kind = .slidingDoor
+                } else if width >= 1.2 {
+                    kind = .doubleDoor
+                } else {
+                    kind = .standardDoor
+                }
+                sillHeight = 0
+            }
+
+            openings.append(RawOpening(
+                kind: kind,
+                positionX: rx,
+                positionZ: rz,
+                width: width,
+                height: height,
+                sillHeight: sillHeight,
+                wallIndex: bestWallIdx >= 0 ? bestWallIdx : 0
+            ))
+            print("[ObjectDetector] Plane \(isDoor ? "door" : "window"): \(Int(width * 1000))mm wide x \(Int(height * 1000))mm high")
+        }
+
+        return openings
     }
 
     // MARK: - Floor / Ceiling Detection

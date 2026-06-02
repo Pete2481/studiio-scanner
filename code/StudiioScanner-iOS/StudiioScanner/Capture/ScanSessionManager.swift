@@ -309,9 +309,9 @@ final class ScanSessionManager: NSObject, ObservableObject {
 
     func finalizeCapture() async -> PropertyProject? {
 
-        // Run geometry-based object detection on collected mesh data
-        debugLog?.log("Running object detection on \(collectedMeshData.count) mesh anchors...")
-        let detection = MeshObjectDetector.detect(from: collectedMeshData)
+        // Run geometry-based object detection on collected mesh data + plane anchors
+        debugLog?.log("Running object detection on \(collectedMeshData.count) mesh anchors + \(collectedPlanes.count) plane anchors...")
+        let detection = MeshObjectDetector.detect(from: collectedMeshData, planeData: collectedPlanes)
 
         let totalArea: Double
         if let dims = detection.roomDimensions {

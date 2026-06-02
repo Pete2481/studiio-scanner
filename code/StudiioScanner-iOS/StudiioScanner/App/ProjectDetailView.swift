@@ -1,7 +1,7 @@
 import SwiftUI
 import PhotosUI
 
-/// Detail view for a single scanned property project
+/// Detail view for a single scanned property project — sci-fi glass card aesthetic.
 struct ProjectDetailView: View {
     @State private var project: PropertyProject
     @ObservedObject var projectStore: ProjectStore
@@ -27,26 +27,31 @@ struct ProjectDetailView: View {
 
     var body: some View {
         ZStack {
-            StudiioTheme.backgroundPrimary
-                .ignoresSafeArea()
+            // Background
+            ZStack {
+                StudiioTheme.backgroundPrimary
+                RadialGradient(
+                    colors: [
+                        StudiioTheme.accentOrange.opacity(0.05),
+                        Color.clear
+                    ],
+                    center: .top,
+                    startRadius: 0,
+                    endRadius: 500
+                )
+            }
+            .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: StudiioTheme.spacingL) {
-                    // Header card
                     headerCard
-
-                    // Stats
                     statsSection
-
-                    // Floors breakdown
                     floorsSection
 
-                    // Outdoor zones
                     if !project.outdoorZones.isEmpty {
                         outdoorSection
                     }
 
-                    // Export actions
                     exportSection
                 }
                 .padding(StudiioTheme.spacingM)
@@ -127,32 +132,43 @@ struct ProjectDetailView: View {
     // MARK: - Header
 
     private var headerCard: some View {
-        VStack(spacing: StudiioTheme.spacingS) {
-            // Hero image / placeholder
+        VStack(spacing: 12) {
+            // Hero image
             Button {
                 showPhotoSource = true
             } label: {
-                RoundedRectangle(cornerRadius: StudiioTheme.cornerRadiusSmall)
-                    .fill(StudiioTheme.backgroundElevated)
-                    .frame(height: 200)
-                    .overlay(
-                        Group {
-                            if let heroImage {
-                                Image(uiImage: heroImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } else {
-                                VStack(spacing: 8) {
-                                    Image(systemName: "camera.fill")
-                                        .font(.system(size: 36))
-                                    Text("Add Photo")
-                                        .font(.caption)
-                                }
-                                .foregroundColor(StudiioTheme.textTertiary)
+                ZStack {
+                    RoundedRectangle(cornerRadius: StudiioTheme.cornerRadiusMedium)
+                        .fill(StudiioTheme.backgroundElevated)
+                        .frame(height: 200)
+
+                    if let heroImage {
+                        Image(uiImage: heroImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: StudiioTheme.cornerRadiusMedium))
+                    } else {
+                        VStack(spacing: 10) {
+                            ZStack {
+                                Circle()
+                                    .fill(StudiioTheme.accentOrange.opacity(0.1))
+                                    .frame(width: 64, height: 64)
+                                Image(systemName: "camera.fill")
+                                    .font(.system(size: 28))
+                                    .foregroundColor(StudiioTheme.accentOrange.opacity(0.5))
                             }
+                            Text("ADD PHOTO")
+                                .font(.system(size: 11, weight: .bold))
+                                .tracking(1.5)
+                                .foregroundColor(StudiioTheme.textTertiary)
                         }
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: StudiioTheme.cornerRadiusSmall))
+                    }
+                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: StudiioTheme.cornerRadiusMedium)
+                        .stroke(StudiioTheme.glassStroke, lineWidth: 0.5)
+                )
             }
 
             // Editable property name
@@ -162,50 +178,32 @@ struct ProjectDetailView: View {
             } label: {
                 HStack(spacing: 6) {
                     Text(project.address ?? "Untitled Property")
-                        .font(.title3.weight(.semibold))
+                        .font(.system(size: 20, weight: .bold))
                         .foregroundColor(StudiioTheme.textPrimary)
 
                     Image(systemName: "pencil")
-                        .font(.caption)
-                        .foregroundColor(StudiioTheme.textTertiary)
+                        .font(.system(size: 11))
+                        .foregroundColor(StudiioTheme.accentOrange.opacity(0.5))
                 }
             }
 
             Text("Scanned \(project.capturedAt.formatted(date: .long, time: .shortened))")
-                .font(.caption)
-                .foregroundColor(StudiioTheme.textSecondary)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundColor(StudiioTheme.textTertiary)
         }
-        .studiioCard()
+        .studiioCard(glow: StudiioTheme.accentOrange, intensity: 0.06)
     }
 
     // MARK: - Stats
 
     private var statsSection: some View {
-        HStack(spacing: StudiioTheme.spacingM) {
-            StatBadge(
-                icon: "square.split.2x2",
-                value: "\(totalRoomCount)",
-                label: "Rooms"
-            )
-
-            StatBadge(
-                icon: "arrow.up.arrow.down",
-                value: "\(project.floors.count)",
-                label: project.floors.count == 1 ? "Floor" : "Floors"
-            )
-
-            StatBadge(
-                icon: "ruler",
-                value: String(format: "%.0f m\u{00B2}", totalArea),
-                label: "Total Area"
-            )
+        HStack(spacing: 12) {
+            StatBadge(icon: "square.split.2x2", value: "\(totalRoomCount)", label: "Rooms")
+            StatBadge(icon: "arrow.up.arrow.down", value: "\(project.floors.count)", label: project.floors.count == 1 ? "Floor" : "Floors")
+            StatBadge(icon: "ruler", value: String(format: "%.0f m\u{00B2}", totalArea), label: "Total Area")
 
             if !project.outdoorZones.isEmpty {
-                StatBadge(
-                    icon: "sun.max",
-                    value: "\(project.outdoorZones.count)",
-                    label: "Outdoor"
-                )
+                StatBadge(icon: "sun.max", value: "\(project.outdoorZones.count)", label: "Outdoor")
             }
         }
     }
@@ -214,9 +212,7 @@ struct ProjectDetailView: View {
 
     private var floorsSection: some View {
         VStack(alignment: .leading, spacing: StudiioTheme.spacingS) {
-            Text("Floors")
-                .font(.headline)
-                .foregroundColor(StudiioTheme.textPrimary)
+            sectionHeader("Floors")
 
             ForEach(project.floors) { floor in
                 FloorRow(floor: floor)
@@ -229,15 +225,18 @@ struct ProjectDetailView: View {
 
     private var outdoorSection: some View {
         VStack(alignment: .leading, spacing: StudiioTheme.spacingS) {
-            Text("Outdoor Zones")
-                .font(.headline)
-                .foregroundColor(StudiioTheme.textPrimary)
+            sectionHeader("Outdoor Zones")
 
             ForEach(project.outdoorZones) { zone in
                 HStack {
-                    Image(systemName: "sun.max")
-                        .foregroundColor(StudiioTheme.accentOrange)
-                        .frame(width: 24)
+                    ZStack {
+                        Circle()
+                            .fill(StudiioTheme.accentOrange.opacity(0.1))
+                            .frame(width: 28, height: 28)
+                        Image(systemName: "sun.max")
+                            .font(.system(size: 12))
+                            .foregroundColor(StudiioTheme.accentOrange)
+                    }
 
                     Text(zone.name.isEmpty ? zone.type.rawValue.capitalized : zone.name)
                         .foregroundColor(StudiioTheme.textPrimary)
@@ -245,8 +244,8 @@ struct ProjectDetailView: View {
                     Spacer()
 
                     Text(zone.type.rawValue.capitalized)
-                        .font(.caption)
-                        .foregroundColor(StudiioTheme.textSecondary)
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundColor(StudiioTheme.textTertiary)
                 }
             }
         }
@@ -287,6 +286,13 @@ struct ProjectDetailView: View {
     }
 
     // MARK: - Helpers
+
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(.system(size: 11, weight: .bold))
+            .tracking(2)
+            .foregroundColor(StudiioTheme.accentOrange.opacity(0.7))
+    }
 
     private var totalRoomCount: Int {
         project.floors.flatMap(\.rooms).count
@@ -392,21 +398,27 @@ struct StatBadge: View {
     let label: String
 
     var body: some View {
-        VStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(StudiioTheme.accentOrange)
+        VStack(spacing: 6) {
+            ZStack {
+                Circle()
+                    .fill(StudiioTheme.accentOrange.opacity(0.08))
+                    .frame(width: 36, height: 36)
+                Image(systemName: icon)
+                    .font(.system(size: 15))
+                    .foregroundColor(StudiioTheme.accentOrange)
+            }
 
             Text(value)
-                .font(.headline)
+                .font(.system(size: 16, weight: .bold, design: .monospaced))
                 .foregroundColor(StudiioTheme.textPrimary)
 
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(StudiioTheme.textSecondary)
+            Text(label.uppercased())
+                .font(.system(size: 8, weight: .bold))
+                .tracking(1)
+                .foregroundColor(StudiioTheme.textTertiary)
         }
         .frame(maxWidth: .infinity)
-        .studiioCard()
+        .studiioCard(glow: StudiioTheme.accentOrange, intensity: 0.04)
     }
 }
 
@@ -419,34 +431,37 @@ struct FloorRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(floor.name)
-                    .font(.subheadline.weight(.medium))
+                    .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(StudiioTheme.textPrimary)
 
                 Spacer()
 
                 Text("\(floor.rooms.count) room\(floor.rooms.count == 1 ? "" : "s")")
-                    .font(.caption)
-                    .foregroundColor(StudiioTheme.textSecondary)
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(StudiioTheme.textTertiary)
             }
 
-            // Room names
             let roomNames = floor.rooms.map(\.name).joined(separator: ", ")
             if !roomNames.isEmpty {
                 Text(roomNames)
-                    .font(.caption)
+                    .font(.system(size: 12))
                     .foregroundColor(StudiioTheme.textTertiary)
                     .lineLimit(2)
             }
 
-            // Object counts
             let objectCount = floor.rooms.flatMap(\.objects).count
             if objectCount > 0 {
-                Text("\(objectCount) tagged object\(objectCount == 1 ? "" : "s")")
-                    .font(.caption)
-                    .foregroundColor(StudiioTheme.accentOrange)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(StudiioTheme.accentOrange)
+                        .frame(width: 4, height: 4)
+                    Text("\(objectCount) tagged object\(objectCount == 1 ? "" : "s")")
+                        .font(.system(size: 11))
+                        .foregroundColor(StudiioTheme.accentOrange.opacity(0.8))
+                }
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
     }
 }
 

@@ -2,20 +2,27 @@ import SwiftUI
 
 enum StudiioTheme {
     // MARK: - Backgrounds
-    static let backgroundPrimary = Color(hex: "0D0D0D")
-    static let backgroundSecondary = Color(hex: "1A1A1A")
-    static let backgroundCard = Color(hex: "1E1E1E")
-    static let backgroundElevated = Color(hex: "2A2A2A")
+    static let backgroundPrimary = Color(hex: "050506")
+    static let backgroundSecondary = Color(hex: "0F0F11")
+    static let backgroundCard = Color(hex: "141416")
+    static let backgroundElevated = Color(hex: "1C1C1F")
+
+    // MARK: - Glass
+    static let glassStroke = Color.white.opacity(0.06)
+    static let glassFill = Color(hex: "1A1A1E").opacity(0.7)
+    static let glassHighlight = Color.white.opacity(0.03)
 
     // MARK: - Accent
     static let accentOrange = Color(hex: "FF8C00")
     static let accentOrangeLight = Color(hex: "FFB347")
     static let accentOrangeDark = Color(hex: "CC7000")
+    static let accentAmber = Color(hex: "FF9F1C")
+    static let accentEmber = Color(hex: "E8601C")
 
     // MARK: - Text
     static let textPrimary = Color.white
-    static let textSecondary = Color(hex: "B0B0B0")
-    static let textTertiary = Color(hex: "6B6B6B")
+    static let textSecondary = Color(hex: "9A9AA0")
+    static let textTertiary = Color(hex: "56565C")
 
     // MARK: - Semantic
     static let scanning = accentOrange
@@ -29,9 +36,9 @@ enum StudiioTheme {
 
     // MARK: - Corner Radius
     static let cornerRadiusSmall: CGFloat = 8
-    static let cornerRadiusMedium: CGFloat = 12
-    static let cornerRadiusLarge: CGFloat = 16
-    static let cornerRadiusPill: CGFloat = 24
+    static let cornerRadiusMedium: CGFloat = 14
+    static let cornerRadiusLarge: CGFloat = 20
+    static let cornerRadiusPill: CGFloat = 28
 
     // MARK: - Spacing
     static let spacingXS: CGFloat = 4

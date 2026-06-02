@@ -36,6 +36,7 @@ struct MeshObjectDetector {
         var positionX: Float
         var positionZ: Float
         var width: Float
+        var height: Float      // calculated from mesh gap (not hardcoded)
         var sillHeight: Float  // 0 for doors, >0 for windows
         var wallIndex: Int     // index into wall array
     }
@@ -44,14 +45,36 @@ struct MeshObjectDetector {
     typealias PropertyProject_WallSegment = WallSegment
     typealias PropertyProject_Opening = DetectedOpening
 
+    // Vertex with optional classification (0=none, 1=wall, 2=floor, 3=ceiling, 4=table, 5=seat, 6=door, 7=window)
+    typealias ClassifiedVertex = (pos: SIMD3<Float>, normal: SIMD3<Float>, classification: UInt8)
+    // Legacy vertex type for functions that don't need classification
+    typealias Vertex = (pos: SIMD3<Float>, normal: SIMD3<Float>)
+
     // MARK: - Main Detection Entry Point
 
-    static func detect(from meshData: [ExtractedMeshData]) -> DetectionResult {
-        // Step 1: Transform all vertices to world space
-        var allVertices: [(pos: SIMD3<Float>, normal: SIMD3<Float>)] = []
+    static func detect(from meshData: [ExtractedMeshData], planeData: [ExtractedPlaneData] = []) -> DetectionResult {
+        // Step 1: Transform all vertices to world space, with per-vertex classification
+        var allVertices: [(pos: SIMD3<Float>, normal: SIMD3<Float>, classification: UInt8)] = []
 
         for data in meshData {
             let t = data.transform
+            // Build per-vertex classification from per-face classifications
+            // ARMeshClassification: 0=none, 1=wall, 2=floor, 3=ceiling, 4=table, 5=seat, 6=door, 7=window
+            var vertexClassifications = Array(repeating: UInt8(0), count: data.positions.count)
+            if !data.classifications.isEmpty {
+                // Each face has 3 vertex indices; assign face classification to its vertices
+                let faceCount = data.indices.count / 3
+                for f in 0..<min(faceCount, data.classifications.count) {
+                    let cls = data.classifications[f]
+                    for vi in 0..<3 {
+                        let idx = Int(data.indices[f * 3 + vi])
+                        if idx < vertexClassifications.count && cls > vertexClassifications[idx] {
+                            vertexClassifications[idx] = cls
+                        }
+                    }
+                }
+            }
+
             for i in 0..<min(data.positions.count, data.normals.count) {
                 let local = data.positions[i]
                 let wp4 = t * SIMD4<Float>(local.x, local.y, local.z, 1.0)
@@ -61,7 +84,8 @@ struct MeshObjectDetector {
                 let wn4 = t * SIMD4<Float>(localN.x, localN.y, localN.z, 0.0)
                 let worldNorm = normalize(SIMD3<Float>(wn4.x, wn4.y, wn4.z))
 
-                allVertices.append((pos: worldPos, normal: worldNorm))
+                let cls = i < vertexClassifications.count ? vertexClassifications[i] : 0
+                allVertices.append((pos: worldPos, normal: worldNorm, classification: cls))
             }
         }
 
@@ -71,32 +95,57 @@ struct MeshObjectDetector {
                                    wallAlignmentAngle: 0, floorPolygon: [])
         }
 
+        // Strip classification for functions that don't need it
+        let plainVertices: [Vertex] = allVertices.map { (pos: $0.pos, normal: $0.normal) }
+
         // Step 2: Find floor and ceiling levels
-        let floorY = findFloorLevel(allVertices)
-        let ceilingY = findCeilingLevel(allVertices, floorY: floorY)
+        let floorY = findFloorLevel(plainVertices)
+        let ceilingY = findCeilingLevel(plainVertices, floorY: floorY)
         print("[ObjectDetector] Floor: \(String(format: "%.2f", floorY))m, Ceiling: \(String(format: "%.2f", ceilingY))m")
 
         // Step 3: Rotate to align walls with axes
-        let (rotatedVertices, rotAngle) = alignToWalls(allVertices, floorY: floorY)
+        let (rotatedPlain, rotAngle) = alignToWalls(plainVertices, floorY: floorY)
+
+        // Also rotate the classified vertices for wall extraction
+        let cosR = cos(rotAngle)
+        let sinR = sin(rotAngle)
+        let rotatedClassified: [ClassifiedVertex] = allVertices.map { v in
+            let rx = v.pos.x * cosR - v.pos.z * sinR
+            let rz = v.pos.x * sinR + v.pos.z * cosR
+            let rnx = v.normal.x * cosR - v.normal.z * sinR
+            let rnz = v.normal.x * sinR + v.normal.z * cosR
+            return (
+                pos: SIMD3<Float>(rx, v.pos.y, rz),
+                normal: SIMD3<Float>(rnx, v.normal.y, rnz),
+                classification: v.classification
+            )
+        }
 
         // Step 4: Detect objects by category
         var objects: [TaggedObject] = []
 
-        let horizontalSurfaces = detectHorizontalSurfaces(rotatedVertices, floorY: floorY)
+        let horizontalSurfaces = detectHorizontalSurfaces(rotatedPlain, floorY: floorY)
         objects.append(contentsOf: horizontalSurfaces)
 
-        let fixtures = detectFixtures(rotatedVertices, floorY: floorY)
+        let fixtures = detectFixtures(rotatedPlain, floorY: floorY)
         objects.append(contentsOf: fixtures)
 
-        let ceilingFixtures = detectCeilingFixtures(rotatedVertices, floorY: floorY, ceilingY: ceilingY)
+        let ceilingFixtures = detectCeilingFixtures(rotatedPlain, floorY: floorY, ceilingY: ceilingY)
         objects.append(contentsOf: ceilingFixtures)
 
-        let wallFeatures = detectWallFeatures(rotatedVertices, floorY: floorY, ceilingY: ceilingY)
+        let wallFeatures = detectWallFeatures(rotatedPlain, floorY: floorY, ceilingY: ceilingY)
         objects.append(contentsOf: wallFeatures)
 
-        // Step 5: Wall lines and openings
-        let wallPoints = extractWallPoints(rotatedVertices, floorY: floorY)
-        let rawWalls = fitRawWalls(from: wallPoints)
+        // Step 5: Wall lines and openings (uses classified vertices to filter out non-wall surfaces)
+        let wallPoints = extractWallPoints(rotatedClassified, floorY: floorY)
+        var rawWalls = fitRawWalls(from: wallPoints)
+
+        // Fix 3: Fuse ARPlaneAnchor wall data — these are Apple's highest-confidence wall detections
+        let planeWalls = wallsFromPlaneAnchors(planeData, rotAngle: rotAngle)
+        if !planeWalls.isEmpty {
+            rawWalls = fusePlaneWalls(planeWalls, with: rawWalls)
+            print("[ObjectDetector] Fused \(planeWalls.count) plane-anchor walls → \(rawWalls.count) total walls")
+        }
 
         // Phase C: Orthogonal wall snapping — snap near-axis walls to exact 0°/90°
         let snappedWalls = snapWallsToOrthogonal(rawWalls)
@@ -107,8 +156,8 @@ struct MeshObjectDetector {
         // Phase C: Corner fitting — extend/trim walls to form clean right-angle intersections
         let cornerFittedWalls = fitCorners(mergedWalls)
 
-        // Detect openings on the cleaned-up walls
-        let rawOpenings = detectRawOpenings(wallLines: cornerFittedWalls, vertices: rotatedVertices, floorY: floorY)
+        // Detect openings on the cleaned-up walls (uses plain vertices for density counting)
+        let rawOpenings = detectRawOpenings(wallLines: cornerFittedWalls, vertices: rotatedPlain, floorY: floorY, ceilingY: ceilingY)
 
         // Step 6: Room dimensions from wall lines
         let dims = measureRoomFromRawWalls(wallLines: cornerFittedWalls)
@@ -141,6 +190,7 @@ struct MeshObjectDetector {
                 kind: o.kind,
                 positionX: px, positionZ: pz,
                 width: Double(o.width),
+                height: Double(o.height),
                 sillHeight: Double(o.sillHeight),
                 wallID: parentWallID
             )
@@ -465,6 +515,115 @@ struct MeshObjectDetector {
         }
 
         return hull
+    }
+
+    // MARK: - Fix 3: ARPlaneAnchor Wall Fusion
+
+    /// Convert ARPlaneAnchors classified as .wall into RawWall segments in rotated space
+    private static func wallsFromPlaneAnchors(_ planes: [ExtractedPlaneData], rotAngle: Float) -> [RawWall] {
+        let cosA = cos(rotAngle)
+        let sinA = sin(rotAngle)
+        var walls: [RawWall] = []
+
+        for plane in planes where plane.classification == .wall && plane.alignment == .vertical {
+            // Plane center in world space
+            let t = plane.transform
+            let worldCenterX = t.columns.3.x + plane.centerX * t.columns.0.x + plane.centerZ * t.columns.2.x
+            let worldCenterZ = t.columns.3.z + plane.centerX * t.columns.0.z + plane.centerZ * t.columns.2.z
+
+            // Plane extent direction (the "width" axis of the plane)
+            let rightX = t.columns.0.x
+            let rightZ = t.columns.0.z
+            let halfWidth = plane.extentX / 2
+
+            // Wall start and end in world space
+            let startX = worldCenterX - rightX * halfWidth
+            let startZ = worldCenterZ - rightZ * halfWidth
+            let endX = worldCenterX + rightX * halfWidth
+            let endZ = worldCenterZ + rightZ * halfWidth
+
+            // Rotate into aligned space
+            let rsx = startX * cosA - startZ * sinA
+            let rsz = startX * sinA + startZ * cosA
+            let rex = endX * cosA - endZ * sinA
+            let rez = endX * sinA + endZ * cosA
+
+            let dx = rex - rsx
+            let dz = rez - rsz
+            let length = sqrt(dx * dx + dz * dz)
+            guard length > 0.5 else { continue }  // skip tiny planes
+
+            let angle = atan2(dz, dx)
+
+            walls.append(RawWall(
+                startX: rsx, startZ: rsz,
+                endX: rex, endZ: rez,
+                thickness: 0.1,  // planes don't have thickness info, use default
+                length: length,
+                angle: angle
+            ))
+        }
+
+        return walls
+    }
+
+    /// Fuse plane-anchor walls with RANSAC walls.
+    /// Plane walls are higher confidence — if a plane wall overlaps a RANSAC wall, prefer the plane wall's position.
+    /// If a plane wall has no RANSAC match, add it as a new wall.
+    private static func fusePlaneWalls(_ planeWalls: [RawWall], with ransacWalls: [RawWall]) -> [RawWall] {
+        var result = ransacWalls
+        let matchThreshold: Float = 0.3  // perpendicular distance to consider same wall
+
+        for pw in planeWalls {
+            let pwMidX = (pw.startX + pw.endX) / 2
+            let pwMidZ = (pw.startZ + pw.endZ) / 2
+
+            // Find closest RANSAC wall
+            var bestMatch = -1
+            var bestDist: Float = .greatestFiniteMagnitude
+
+            for (i, rw) in result.enumerated() {
+                // Check if roughly parallel (within 20 degrees)
+                let angleDiff = abs(pw.angle - rw.angle)
+                let isParallel = angleDiff < 0.35 || abs(angleDiff - .pi) < 0.35 || abs(angleDiff - .pi / 2) < 0.35
+
+                guard isParallel else { continue }
+
+                // Perpendicular distance from plane wall midpoint to RANSAC wall line
+                let rwDx = rw.endX - rw.startX
+                let rwDz = rw.endZ - rw.startZ
+                let rwLen = sqrt(rwDx * rwDx + rwDz * rwDz)
+                guard rwLen > 0 else { continue }
+                let nx = -rwDz / rwLen
+                let nz = rwDx / rwLen
+                let dist = abs((pwMidX - rw.startX) * nx + (pwMidZ - rw.startZ) * nz)
+
+                if dist < bestDist {
+                    bestDist = dist
+                    bestMatch = i
+                }
+            }
+
+            if bestDist < matchThreshold && bestMatch >= 0 {
+                // Plane wall confirms this RANSAC wall — adjust RANSAC wall position
+                // toward plane position (plane anchors are higher confidence)
+                let blend: Float = 0.6  // 60% plane, 40% RANSAC
+                result[bestMatch].startX = result[bestMatch].startX * (1 - blend) + pw.startX * blend
+                result[bestMatch].startZ = result[bestMatch].startZ * (1 - blend) + pw.startZ * blend
+                result[bestMatch].endX = result[bestMatch].endX * (1 - blend) + pw.endX * blend
+                result[bestMatch].endZ = result[bestMatch].endZ * (1 - blend) + pw.endZ * blend
+
+                // Extend wall span if plane is longer
+                let dx = result[bestMatch].endX - result[bestMatch].startX
+                let dz = result[bestMatch].endZ - result[bestMatch].startZ
+                result[bestMatch].length = sqrt(dx * dx + dz * dz)
+            } else {
+                // No RANSAC match — add plane wall as new wall
+                result.append(pw)
+            }
+        }
+
+        return result
     }
 
     // MARK: - Floor / Ceiling Detection
@@ -795,12 +954,16 @@ struct MeshObjectDetector {
 
     // MARK: - Wall Point Extraction & Fitting
 
-    private static func extractWallPoints(_ vertices: [(pos: SIMD3<Float>, normal: SIMD3<Float>)], floorY: Float) -> [(x: Float, z: Float)] {
+    private static func extractWallPoints(_ vertices: [(pos: SIMD3<Float>, normal: SIMD3<Float>, classification: UInt8)], floorY: Float) -> [(x: Float, z: Float)] {
+        // ARMeshClassification values: 0=none, 1=wall, 2=floor, 3=ceiling, 4=table, 5=seat, 6=door, 7=window
+        let wallClassifications: Set<UInt8> = [0, 1, 6, 7]  // none (unclassified), wall, door, window
         var points: [(x: Float, z: Float)] = []
         for v in vertices {
-            let isWall = abs(v.normal.y) < 0.3
+            let isWallNormal = abs(v.normal.y) < 0.3
             let inSlice = v.pos.y >= floorY + 0.5 && v.pos.y <= floorY + 1.5
-            if isWall && inSlice {
+            // If classifications are available, filter out non-wall surfaces (tables, seats, floors, ceilings)
+            let classOK = v.classification == 0 || wallClassifications.contains(v.classification)
+            if isWallNormal && inSlice && classOK {
                 points.append((x: v.pos.x, z: v.pos.z))
             }
         }
@@ -838,7 +1001,7 @@ struct MeshObjectDetector {
 
                 for p in remaining {
                     let dist = abs((p.x - p1.x) * nx + (p.z - p1.z) * nz)
-                    if dist < 0.04 {
+                    if dist < 0.08 {
                         inliers.append(p)
                     } else {
                         outliers.append(p)
@@ -888,7 +1051,7 @@ struct MeshObjectDetector {
 
     // MARK: - Opening Detection
 
-    private static func detectRawOpenings(wallLines: [RawWall], vertices: [(pos: SIMD3<Float>, normal: SIMD3<Float>)], floorY: Float) -> [RawOpening] {
+    private static func detectRawOpenings(wallLines: [RawWall], vertices: [Vertex], floorY: Float, ceilingY: Float = 2.4) -> [RawOpening] {
         var openings: [RawOpening] = []
 
         for (wallIndex, wall) in wallLines.enumerated() where wall.length > 1.0 {
@@ -946,6 +1109,35 @@ struct MeshObjectDetector {
                         let hasWallBelow = lowDensity > (seg - gapStart) * 2
                         let sillHeight: Float = hasWallBelow ? 0.9 : 0
 
+                        // Fix 4: Calculate actual opening height from mesh gap
+                        // Find the highest point with wall density above the gap
+                        let gapCenterX = posX
+                        let gapCenterZ = posZ
+                        var maxGapHeight: Float = ceilingY - floorY  // default to full height
+                        // Search for the lintel (top of opening) by scanning upward
+                        let heightStep: Float = 0.1
+                        var testHeight = floorY + (hasWallBelow ? 1.0 : 0.3)
+                        while testHeight < ceilingY {
+                            // Count wall vertices at this height in the gap region
+                            var countAtHeight = 0
+                            for v in vertices {
+                                let perpDist = abs((v.pos.x - wall.startX) * nx + (v.pos.z - wall.startZ) * nz)
+                                guard perpDist < 0.15 && abs(v.normal.y) < 0.3 else { continue }
+                                let t = (v.pos.x - wall.startX) * (dx / len) + (v.pos.z - wall.startZ) * (dz / len)
+                                let inGapRange = t >= Float(gapStart) * segSize && t <= Float(seg) * segSize
+                                let atHeight = abs(v.pos.y - testHeight) < heightStep / 2
+                                if inGapRange && atHeight { countAtHeight += 1 }
+                            }
+                            // If we find wall material, the opening ends here
+                            if countAtHeight > 3 {
+                                maxGapHeight = testHeight - floorY - sillHeight
+                                break
+                            }
+                            testHeight += heightStep
+                        }
+                        // Clamp to reasonable range
+                        let openingHeight = max(0.5, min(maxGapHeight, ceilingY - floorY))
+
                         let kind: OpeningKind
                         if hasWallBelow {
                             kind = .window
@@ -965,10 +1157,11 @@ struct MeshObjectDetector {
                             kind: kind,
                             positionX: posX, positionZ: posZ,
                             width: gapWidth,
+                            height: openingHeight,
                             sillHeight: sillHeight,
                             wallIndex: wallIndex
                         ))
-                        print("[ObjectDetector] \(kind.rawValue): \(Int(gapWidth * 1000))mm at (\(String(format: "%.2f", posX)), \(String(format: "%.2f", posZ)))")
+                        print("[ObjectDetector] \(kind.rawValue): \(Int(gapWidth * 1000))mm wide x \(Int(openingHeight * 1000))mm high at (\(String(format: "%.2f", posX)), \(String(format: "%.2f", posZ)))")
                     }
                 }
             }

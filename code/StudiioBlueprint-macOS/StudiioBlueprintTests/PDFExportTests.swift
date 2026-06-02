@@ -137,10 +137,10 @@ struct PDFExportTests {
                 )
             ],
             walls: [
-                WallSegment(start: CGPoint(x: 0, y: 0), end: CGPoint(x: 4, y: 0)),
-                WallSegment(start: CGPoint(x: 4, y: 0), end: CGPoint(x: 4, y: 3)),
-                WallSegment(start: CGPoint(x: 4, y: 3), end: CGPoint(x: 0, y: 3)),
-                WallSegment(start: CGPoint(x: 0, y: 3), end: CGPoint(x: 0, y: 0)),
+                BlueprintWall(start: CGPoint(x: 0, y: 0), end: CGPoint(x: 4, y: 0)),
+                BlueprintWall(start: CGPoint(x: 4, y: 0), end: CGPoint(x: 4, y: 3)),
+                BlueprintWall(start: CGPoint(x: 4, y: 3), end: CGPoint(x: 0, y: 3)),
+                BlueprintWall(start: CGPoint(x: 0, y: 3), end: CGPoint(x: 0, y: 0)),
             ],
             floorName: "Ground",
             totalArea: 12

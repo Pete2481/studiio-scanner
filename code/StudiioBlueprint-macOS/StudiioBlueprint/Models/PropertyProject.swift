@@ -50,7 +50,7 @@ struct Floor: Codable, Identifiable {
     }
 }
 
-struct Room: Codable, Identifiable {
+struct Room: Identifiable {
     let id: UUID
     var name: String
     var meshUSDZPath: String?
@@ -59,6 +59,16 @@ struct Room: Codable, Identifiable {
     var photosPaths: [String]
     var verifiedDimensions: [VerifiedDimension]
 
+    // Architectural geometry from MeshObjectDetector
+    var walls: [WallSegment]
+    var openings: [DetectedOpening]
+    var roomWidth: Double?
+    var roomDepth: Double?
+    var floorLevel: Double
+    var ceilingLevel: Double?
+    var wallAlignmentAngle: Double
+    var floorPolygon: [PointXZ]
+
     init(
         id: UUID = UUID(),
         name: String = "Room",
@@ -66,7 +76,15 @@ struct Room: Codable, Identifiable {
         objects: [TaggedObject] = [],
         area: Double = 0,
         photosPaths: [String] = [],
-        verifiedDimensions: [VerifiedDimension] = []
+        verifiedDimensions: [VerifiedDimension] = [],
+        walls: [WallSegment] = [],
+        openings: [DetectedOpening] = [],
+        roomWidth: Double? = nil,
+        roomDepth: Double? = nil,
+        floorLevel: Double = 0,
+        ceilingLevel: Double? = nil,
+        wallAlignmentAngle: Double = 0,
+        floorPolygon: [PointXZ] = []
     ) {
         self.id = id
         self.name = name
@@ -75,8 +93,133 @@ struct Room: Codable, Identifiable {
         self.area = area
         self.photosPaths = photosPaths
         self.verifiedDimensions = verifiedDimensions
+        self.walls = walls
+        self.openings = openings
+        self.roomWidth = roomWidth
+        self.roomDepth = roomDepth
+        self.floorLevel = floorLevel
+        self.ceilingLevel = ceilingLevel
+        self.wallAlignmentAngle = wallAlignmentAngle
+        self.floorPolygon = floorPolygon
     }
 }
+
+// MARK: - Room Codable (backwards compatible — old bundles without wall data still decode)
+
+extension Room: Codable {
+    enum CodingKeys: String, CodingKey {
+        case id, name, meshUSDZPath, objects, area, photosPaths, verifiedDimensions
+        case walls, openings, roomWidth, roomDepth, floorLevel, ceilingLevel
+        case wallAlignmentAngle, floorPolygon
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        name = try c.decode(String.self, forKey: .name)
+        meshUSDZPath = try c.decodeIfPresent(String.self, forKey: .meshUSDZPath)
+        objects = try c.decode([TaggedObject].self, forKey: .objects)
+        area = try c.decode(Double.self, forKey: .area)
+        photosPaths = try c.decode([String].self, forKey: .photosPaths)
+        verifiedDimensions = try c.decode([VerifiedDimension].self, forKey: .verifiedDimensions)
+        walls = try c.decodeIfPresent([WallSegment].self, forKey: .walls) ?? []
+        openings = try c.decodeIfPresent([DetectedOpening].self, forKey: .openings) ?? []
+        roomWidth = try c.decodeIfPresent(Double.self, forKey: .roomWidth)
+        roomDepth = try c.decodeIfPresent(Double.self, forKey: .roomDepth)
+        floorLevel = try c.decodeIfPresent(Double.self, forKey: .floorLevel) ?? 0
+        ceilingLevel = try c.decodeIfPresent(Double.self, forKey: .ceilingLevel)
+        wallAlignmentAngle = try c.decodeIfPresent(Double.self, forKey: .wallAlignmentAngle) ?? 0
+        floorPolygon = try c.decodeIfPresent([PointXZ].self, forKey: .floorPolygon) ?? []
+    }
+}
+
+// MARK: - Wall Segment
+
+struct WallSegment: Codable, Identifiable {
+    let id: UUID
+    var startX: Double
+    var startZ: Double
+    var endX: Double
+    var endZ: Double
+    var thickness: Double
+    var length: Double
+    var angle: Double
+    var isExterior: Bool
+
+    init(
+        id: UUID = UUID(),
+        startX: Double, startZ: Double,
+        endX: Double, endZ: Double,
+        thickness: Double, length: Double,
+        angle: Double = 0,
+        isExterior: Bool = false
+    ) {
+        self.id = id
+        self.startX = startX
+        self.startZ = startZ
+        self.endX = endX
+        self.endZ = endZ
+        self.thickness = thickness
+        self.length = length
+        self.angle = angle
+        self.isExterior = isExterior
+    }
+}
+
+// MARK: - Detected Opening
+
+struct DetectedOpening: Codable, Identifiable {
+    let id: UUID
+    var kind: OpeningKind
+    var positionX: Double
+    var positionZ: Double
+    var width: Double
+    var height: Double
+    var sillHeight: Double
+    var wallID: UUID?
+
+    init(
+        id: UUID = UUID(),
+        kind: OpeningKind,
+        positionX: Double, positionZ: Double,
+        width: Double, height: Double = 2.04,
+        sillHeight: Double = 0,
+        wallID: UUID? = nil
+    ) {
+        self.id = id
+        self.kind = kind
+        self.positionX = positionX
+        self.positionZ = positionZ
+        self.width = width
+        self.height = height
+        self.sillHeight = sillHeight
+        self.wallID = wallID
+    }
+}
+
+enum OpeningKind: String, Codable, CaseIterable {
+    case standardDoor
+    case doubleDoor
+    case slidingDoor
+    case garageDoor
+    case pocketDoor
+    case window
+    case openingPassthrough
+}
+
+// MARK: - 2D Point
+
+struct PointXZ: Codable {
+    var x: Double
+    var z: Double
+
+    init(x: Double, z: Double) {
+        self.x = x
+        self.z = z
+    }
+}
+
+// MARK: - Tagged Object
 
 struct TaggedObject: Codable, Identifiable {
     let id: UUID

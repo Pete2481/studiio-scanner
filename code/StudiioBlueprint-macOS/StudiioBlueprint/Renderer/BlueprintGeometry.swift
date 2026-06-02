@@ -4,9 +4,9 @@ import CoreGraphics
 /// Geometry types used by the 2D blueprint renderer.
 /// All measurements are in metres; the renderer scales to screen/page coordinates.
 
-// MARK: - Wall Segment
+// MARK: - Blueprint Wall (renderer's wall type, distinct from model WallSegment)
 
-struct WallSegment: Identifiable {
+struct BlueprintWall: Identifiable {
     let id: UUID
     var start: CGPoint     // metres
     var end: CGPoint       // metres
@@ -18,7 +18,8 @@ struct WallSegment: Identifiable {
         start: CGPoint,
         end: CGPoint,
         thickness: CGFloat = 0.1,
-        isExterior: Bool = false
+        isExterior: Bool = false,
+        length: CGFloat? = nil
     ) {
         self.id = id
         self.start = start
@@ -76,7 +77,6 @@ struct RoomPolygon: Identifiable {
         return CGPoint(x: sumX / CGFloat(polygon.count), y: sumY / CGFloat(polygon.count))
     }
 
-    /// Bounding rect in metres
     var bounds: CGRect {
         guard let first = polygon.first else { return .zero }
         var minX = first.x, maxX = first.x
@@ -98,11 +98,10 @@ struct RoomPolygon: Identifiable {
 
 struct FloorPlanLayout {
     var rooms: [RoomPolygon]
-    var walls: [WallSegment]
+    var walls: [BlueprintWall]
     var floorName: String
     var totalArea: Double
 
-    /// Overall bounding rect of all geometry
     var bounds: CGRect {
         var allPoints: [CGPoint] = []
         for room in rooms {
@@ -128,11 +127,10 @@ struct FloorPlanLayout {
 // MARK: - Scale & Transform
 
 struct BlueprintTransform {
-    let scale: CGFloat        // points per metre
-    let offset: CGPoint       // offset to centre the plan
-    let metricScale: String   // "1:100"
+    let scale: CGFloat
+    let offset: CGPoint
+    let metricScale: String
 
-    /// Scale factor for 1:100 on A3 paper (420mm x 297mm at 72dpi)
     static func forA3(planBounds: CGRect, canvasSize: CGSize, margin: CGFloat = 60) -> BlueprintTransform {
         let availableWidth = canvasSize.width - 2 * margin
         let availableHeight = canvasSize.height - 2 * margin
@@ -154,7 +152,6 @@ struct BlueprintTransform {
         )
     }
 
-    /// Convert metres to canvas points
     func point(from metres: CGPoint) -> CGPoint {
         CGPoint(
             x: metres.x * scale + offset.x,

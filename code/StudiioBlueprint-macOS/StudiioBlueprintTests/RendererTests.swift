@@ -8,9 +8,9 @@ struct RendererTests {
 
     // MARK: - Geometry
 
-    @Test("WallSegment calculates length correctly")
+    @Test("BlueprintWall calculates length correctly")
     func testWallLength() {
-        let wall = WallSegment(
+        let wall = BlueprintWall(
             start: CGPoint(x: 0, y: 0),
             end: CGPoint(x: 3, y: 4),
             thickness: 0.1
@@ -18,9 +18,9 @@ struct RendererTests {
         #expect(abs(wall.length - 5.0) < 0.001)
     }
 
-    @Test("WallSegment calculates midpoint correctly")
+    @Test("BlueprintWall calculates midpoint correctly")
     func testWallMidpoint() {
-        let wall = WallSegment(
+        let wall = BlueprintWall(
             start: CGPoint(x: 0, y: 0),
             end: CGPoint(x: 4, y: 6)
         )

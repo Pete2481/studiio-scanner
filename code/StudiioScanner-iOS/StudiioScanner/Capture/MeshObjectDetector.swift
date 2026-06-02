@@ -20,6 +20,17 @@ struct MeshObjectDetector {
         var ceilingLevel: Float
         var wallAlignmentAngle: Float
         var floorPolygon: [PointXZ]
+        var rooms: [RoomSegment]  // ceiling-plane segmented rooms
+    }
+
+    struct RoomSegment {
+        var name: String
+        var polygon: [PointXZ]
+        var walls: [PropertyProject_WallSegment]
+        var openings: [PropertyProject_Opening]
+        var area: Double
+        var width: Double
+        var depth: Double
     }
 
     // Internal working types (converted to model types for persistence)
@@ -92,7 +103,7 @@ struct MeshObjectDetector {
         guard !allVertices.isEmpty else {
             return DetectionResult(objects: [], wallLines: [], openings: [],
                                    roomDimensions: nil, floorLevel: 0, ceilingLevel: 2.4,
-                                   wallAlignmentAngle: 0, floorPolygon: [])
+                                   wallAlignmentAngle: 0, floorPolygon: [], rooms: [])
         }
 
         // Strip classification for functions that don't need it
@@ -244,6 +255,16 @@ struct MeshObjectDetector {
 
         print("[ObjectDetector] Detected \(unrotObjects.count) objects, \(modelWalls.count) walls, \(modelOpenings.count) openings, \(modelFloorPoly.count)-pt polygon")
 
+        // Room segmentation: each ceiling plane = one room
+        let segmentedRooms = segmentRoomsByCeiling(
+            planeData: planeData,
+            walls: modelWalls,
+            openings: modelOpenings,
+            floorLevel: floorY,
+            ceilingLevel: ceilingY
+        )
+        print("[ObjectDetector] Segmented into \(segmentedRooms.count) rooms from ceiling planes")
+
         return DetectionResult(
             objects: unrotObjects,
             wallLines: modelWalls,
@@ -252,8 +273,133 @@ struct MeshObjectDetector {
             floorLevel: floorY,
             ceilingLevel: ceilingY,
             wallAlignmentAngle: rotAngle,
-            floorPolygon: modelFloorPoly
+            floorPolygon: modelFloorPoly,
+            rooms: segmentedRooms
         )
+    }
+
+    // MARK: - Room Segmentation by Ceiling Planes
+
+    /// Each ceiling plane = one room. Walls and openings are assigned to the
+    /// room whose ceiling footprint they fall within.
+    private static func segmentRoomsByCeiling(
+        planeData: [ExtractedPlaneData],
+        walls: [WallSegment],
+        openings: [DetectedOpening],
+        floorLevel: Float,
+        ceilingLevel: Float
+    ) -> [RoomSegment] {
+        // Find ceiling planes (horizontal, classified as ceiling)
+        let ceilingPlanes = planeData.filter { $0.classification == .ceiling && $0.alignment == .horizontal }
+        guard !ceilingPlanes.isEmpty else { return [] }
+
+        var rooms: [RoomSegment] = []
+        var roomIndex = 0
+
+        for plane in ceilingPlanes {
+            // Skip tiny ceiling fragments (< 4 m²)
+            let area = Double(plane.extentX * plane.extentZ)
+            guard area > 4.0 else { continue }
+
+            // Compute the 4 corners of the ceiling plane in world XZ space
+            let footprint = ceilingFootprintXZ(plane)
+            guard footprint.count == 4 else { continue }
+
+            // Convert footprint to PointXZ for storage
+            let polygon = footprint.map { PointXZ(x: Double($0.x), z: Double($0.y)) }
+
+            // Find walls whose midpoint is inside this ceiling footprint
+            var roomWalls: [WallSegment] = []
+            for wall in walls {
+                let midX = Float((wall.startX + wall.endX) / 2)
+                let midZ = Float((wall.startZ + wall.endZ) / 2)
+                if pointInConvexPolygon(SIMD2<Float>(midX, midZ), polygon: footprint, tolerance: 0.3) {
+                    roomWalls.append(wall)
+                }
+            }
+
+            // Find openings inside this ceiling footprint
+            var roomOpenings: [DetectedOpening] = []
+            for opening in openings {
+                let px = Float(opening.positionX)
+                let pz = Float(opening.positionZ)
+                if pointInConvexPolygon(SIMD2<Float>(px, pz), polygon: footprint, tolerance: 0.5) {
+                    roomOpenings.append(opening)
+                }
+            }
+
+            roomIndex += 1
+            let name = ceilingPlanes.count == 1 ? "Scanned Area" : "Room \(roomIndex)"
+
+            rooms.append(RoomSegment(
+                name: name,
+                polygon: polygon,
+                walls: roomWalls,
+                openings: roomOpenings,
+                area: area,
+                width: Double(plane.extentX),
+                depth: Double(plane.extentZ)
+            ))
+            print("[ObjectDetector] Room '\(name)': \(String(format: "%.1f", plane.extentX))m × \(String(format: "%.1f", plane.extentZ))m = \(String(format: "%.1f", area))m², \(roomWalls.count) walls, \(roomOpenings.count) openings")
+        }
+
+        return rooms
+    }
+
+    /// Get the 4 corners of a ceiling plane projected to XZ (floor plan) space
+    private static func ceilingFootprintXZ(_ plane: ExtractedPlaneData) -> [SIMD2<Float>] {
+        let t = plane.transform
+        let cx = plane.centerX
+        let cz = plane.centerZ
+        let hw = plane.extentX / 2
+        let hz = plane.extentZ / 2
+
+        // 4 corners in plane-local space
+        let localCorners: [(Float, Float)] = [
+            (cx - hw, cz - hz),
+            (cx + hw, cz - hz),
+            (cx + hw, cz + hz),
+            (cx - hw, cz + hz)
+        ]
+
+        // Transform to world space, project to XZ
+        return localCorners.map { (lx, lz) in
+            let wp = t * SIMD4<Float>(lx, 0, lz, 1)
+            return SIMD2<Float>(wp.x, wp.z)
+        }
+    }
+
+    /// Point-in-convex-polygon test using cross products (with tolerance buffer)
+    private static func pointInConvexPolygon(_ point: SIMD2<Float>, polygon: [SIMD2<Float>], tolerance: Float) -> Bool {
+        guard polygon.count >= 3 else { return false }
+
+        // First check simple bounding box with tolerance
+        let xs = polygon.map(\.x)
+        let ys = polygon.map(\.y)
+        guard let minX = xs.min(), let maxX = xs.max(),
+              let minY = ys.min(), let maxY = ys.max() else { return false }
+        guard point.x >= minX - tolerance && point.x <= maxX + tolerance &&
+              point.y >= minY - tolerance && point.y <= maxY + tolerance else { return false }
+
+        // Winding number test for robust point-in-polygon
+        var winding = 0
+        let n = polygon.count
+        for i in 0..<n {
+            let j = (i + 1) % n
+            let vi = polygon[i], vj = polygon[j]
+            if vi.y <= point.y {
+                if vj.y > point.y {
+                    let cross = (vj.x - vi.x) * (point.y - vi.y) - (point.x - vi.x) * (vj.y - vi.y)
+                    if cross > -tolerance { winding += 1 }
+                }
+            } else {
+                if vj.y <= point.y {
+                    let cross = (vj.x - vi.x) * (point.y - vi.y) - (point.x - vi.x) * (vj.y - vi.y)
+                    if cross < tolerance { winding -= 1 }
+                }
+            }
+        }
+        return winding != 0
     }
 
     // MARK: - Phase C: Orthogonal Wall Snapping

@@ -313,30 +313,53 @@ final class ScanSessionManager: NSObject, ObservableObject {
         debugLog?.log("Running object detection on \(collectedMeshData.count) mesh anchors + \(collectedPlanes.count) plane anchors...")
         let detection = MeshObjectDetector.detect(from: collectedMeshData, planeData: collectedPlanes)
 
-        let totalArea: Double
-        if let dims = detection.roomDimensions {
-            totalArea = Double(dims.width * dims.depth)
-            debugLog?.log("Room: \(Int(dims.width * 1000))x\(Int(dims.depth * 1000))mm = \(String(format: "%.1f", totalArea)) m²")
+        debugLog?.log("Detected \(detection.objects.count) objects, \(detection.openings.count) openings, \(detection.wallLines.count) walls, \(detection.rooms.count) ceiling-segmented rooms")
+
+        // Build rooms: use ceiling-plane segmented rooms if available, otherwise single room fallback
+        let scannedRooms: [Room]
+        if !detection.rooms.isEmpty {
+            scannedRooms = detection.rooms.map { seg in
+                Room(
+                    name: seg.name,
+                    objects: [],  // object detection disabled
+                    area: seg.area,
+                    walls: seg.walls,
+                    openings: seg.openings,
+                    roomWidth: seg.width,
+                    roomDepth: seg.depth,
+                    floorLevel: Double(detection.floorLevel),
+                    ceilingLevel: Double(detection.ceilingLevel),
+                    wallAlignmentAngle: Double(detection.wallAlignmentAngle),
+                    floorPolygon: seg.polygon
+                )
+            }
+            debugLog?.log("Using \(scannedRooms.count) ceiling-segmented rooms")
+            for (i, r) in scannedRooms.enumerated() {
+                debugLog?.log("  Room \(i): '\(r.name)' \(String(format: "%.1f", r.roomWidth ?? 0))x\(String(format: "%.1f", r.roomDepth ?? 0))m, \(r.walls.count) walls, \(r.openings.count) openings")
+            }
         } else {
-            totalArea = estimateAreaFromMesh()
-            debugLog?.log("Fallback area estimate: \(String(format: "%.1f", totalArea)) m²")
+            // Fallback: single room from all detected geometry
+            let totalArea: Double
+            if let dims = detection.roomDimensions {
+                totalArea = Double(dims.width * dims.depth)
+            } else {
+                totalArea = estimateAreaFromMesh()
+            }
+            scannedRooms = [Room(
+                name: "Scanned Area",
+                objects: detection.objects,
+                area: totalArea,
+                walls: detection.wallLines,
+                openings: detection.openings,
+                roomWidth: detection.roomDimensions.map { Double($0.width) },
+                roomDepth: detection.roomDimensions.map { Double($0.depth) },
+                floorLevel: Double(detection.floorLevel),
+                ceilingLevel: Double(detection.ceilingLevel),
+                wallAlignmentAngle: Double(detection.wallAlignmentAngle),
+                floorPolygon: detection.floorPolygon
+            )]
+            debugLog?.log("Fallback: single room, area \(String(format: "%.1f", totalArea))m²")
         }
-
-        debugLog?.log("Detected \(detection.objects.count) objects, \(detection.openings.count) openings, \(detection.wallLines.count) walls")
-
-        let room = Room(
-            name: "Scanned Area",
-            objects: detection.objects,
-            area: totalArea,
-            walls: detection.wallLines,
-            openings: detection.openings,
-            roomWidth: detection.roomDimensions.map { Double($0.width) },
-            roomDepth: detection.roomDimensions.map { Double($0.depth) },
-            floorLevel: Double(detection.floorLevel),
-            ceilingLevel: Double(detection.ceilingLevel),
-            wallAlignmentAngle: Double(detection.wallAlignmentAngle),
-            floorPolygon: detection.floorPolygon
-        )
 
         var allFloors = floors
         allFloors.append(currentFloor)
@@ -346,26 +369,16 @@ final class ScanSessionManager: NSObject, ObservableObject {
             projectFloors = [Floor(
                 name: "Ground",
                 elevation: 0,
-                rooms: [room]
+                rooms: scannedRooms
             )]
         } else {
-            projectFloors = allFloors.map { floor in
+            // Multi-floor: for now, put all rooms on the current floor
+            // (future: assign rooms to floors by elevation)
+            projectFloors = allFloors.enumerated().map { (i, floor) in
                 Floor(
                     name: floor.name,
                     elevation: floor.elevation,
-                    rooms: [Room(
-                        name: "Scanned Area",
-                        objects: detection.objects,
-                        area: totalArea / Double(allFloors.count),
-                        walls: detection.wallLines,
-                        openings: detection.openings,
-                        roomWidth: detection.roomDimensions.map { Double($0.width) },
-                        roomDepth: detection.roomDimensions.map { Double($0.depth) },
-                        floorLevel: Double(detection.floorLevel),
-                        ceilingLevel: Double(detection.ceilingLevel),
-                        wallAlignmentAngle: Double(detection.wallAlignmentAngle),
-                        floorPolygon: detection.floorPolygon
-                    )]
+                    rooms: i == allFloors.count - 1 ? scannedRooms : []
                 )
             }
         }
